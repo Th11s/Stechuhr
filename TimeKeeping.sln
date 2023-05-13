@@ -9,6 +9,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TimeKeeping.Web.Server", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TimeKeeping.Web.Shared", "src\TimeKeeping.Web\Shared\TimeKeeping.Web.Shared.csproj", "{4A3DE85E-5D5C-4F3A-96B9-0A1D85B94ADB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{75DD8FD6-2E11-4D16-9A7F-320E23160823}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "frontend", "frontend", "{6D5F73A5-1221-4165-B33B-79C4A5A03D01}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "browser", "browser", "{B7B189DF-D034-4102-8BC2-2200F8DA7871}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6A33F18A-F5CE-4156-AB3A-443ECCE9577F}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +43,13 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D32365D2-DE1B-47F7-B635-81CAD611E7A1} = {B7B189DF-D034-4102-8BC2-2200F8DA7871}
+		{3960E9CC-4196-430C-8F5C-B479E5857AF2} = {B7B189DF-D034-4102-8BC2-2200F8DA7871}
+		{4A3DE85E-5D5C-4F3A-96B9-0A1D85B94ADB} = {B7B189DF-D034-4102-8BC2-2200F8DA7871}
+		{6D5F73A5-1221-4165-B33B-79C4A5A03D01} = {75DD8FD6-2E11-4D16-9A7F-320E23160823}
+		{B7B189DF-D034-4102-8BC2-2200F8DA7871} = {6D5F73A5-1221-4165-B33B-79C4A5A03D01}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94FFE0C2-49F3-4952-A5F5-3BDBC06C3B2F}
