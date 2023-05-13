@@ -2,8 +2,119 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="row mt-3 justify-content-center">
+    <div class="col-12">
+        <h1 class="text-center">Zeiterfassung</h1>
+    </div>
+    <div class="col-12 col-md-5 col-xl-4 col-xxl-3">
 
-Welcome to your new app.
+        <div class="d-grid gap-2">
+            <button @onclick="() => AddEntry(EntryType.WorkStart)" class="btn btn-outline-primary">Arbeitsanfang</button>
+            <button @onclick="() => AddEntry(EntryType.BreakStart)" class="btn btn-outline-primary">Pausenanfang</button>
+            <button @onclick="() => AddEntry(EntryType.BreakEnd)" class="btn btn-outline-primary">Pausenende</button>
+            <button @onclick="() => AddEntry(EntryType.WorkEnd)" class="btn btn-outline-primary">Arbeitsende</button>
+        </div>
+        <hr />
+        <div class="d-grid gap-2">
+            <button @onclick="() => _editEntry = new()" href="edit" class="btn btn-outline-secondary">Nachtrag</button>
+        </div>
+    </div>
+    <div class="col-12 col-md-5 col-xl-4 col-xxl-3">
+        @foreach (var entry in _entries.OrderBy(x => x.At))
+        {
+            <hr class="my-2" />
+            <div class="d-flex justify-content-between align-items-center">
+                <span>
+                    @entry.At.LocalDateTime.ToString("HH:mm") @entry.Type
+                </span>
+                <span>
+                    <button @onclick="() => EditEntry(entry)" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                </span>
+            </div>
+        }
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+        <div class=""></div>
+    </div>
+</div>
+@if (_editEntry != null) //TODO Modal?
+{
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-xl-8 col-xxl-6">
+            <hr />
+
+            <div class="mb-2">
+                <label>Art</label>
+                <select @bind="_editEntry.Type" class="form-select">
+                    @foreach (var type in Enum.GetValues<EntryType>())
+                    {
+                        <option selected="@(type == _editEntry.Type)" value="@type">@type</option>
+                    }
+                </select>
+            </div>
+
+            <div class="mb-2">
+                <label>Uhrzeit</label>
+                <input class="form-control" @bind="_editEntry.At" type="time" />
+            </div>
+
+            <div @onclick="HandleSaveEntry" class="btn btn-primary">save</div>
+            <div @onclick="HandleDeleteEntry" class="btn btn-danger">remove</div>
+            <div @onclick="HandleClose" class="btn btn-secondary">close</div>
+        </div>
+    </div>
+}
+
+@code
+{
+    [Inject]
+    public AppStore AppStore { get; set; } = default!;
+
+    private List<Entry> _entries = new();
+
+    private Entry? _originalEntry;
+    private Entry? _editEntry;
+
+    public async Task AddEntry(EntryType type)
+    {
+        var entry = new Entry(type, DateTimeOffset.Now);
+
+        await AppStore.Upsert(entry);
+        _entries.Add(entry);
+    }
+
+    public void EditEntry(Entry entry)
+    {
+        _editEntry = new(entry.Type, entry.At, entry.Uuid);
+        _originalEntry = entry;
+    }
+
+    public void HandleClose()
+    {
+        _originalEntry = null;
+        _editEntry = null;
+    }
+
+    public async Task HandleDeleteEntry()
+    {
+        if (_originalEntry == null) throw new InvalidOperationException($"{nameof(HandleSaveEntry)} called in invalid state");
+
+        await AppStore.RemoveEntry(_originalEntry);
+        _entries.Remove(_originalEntry);
+
+        _editEntry = null;
+        _originalEntry = null;
+    }
+
+    public async Task HandleSaveEntry()
+    {
+        if (_editEntry == null || _originalEntry == null) throw new InvalidOperationException($"{nameof(HandleSaveEntry)} called in invalid state");
+
+        await AppStore.Upsert(_editEntry);
+        _entries.Remove(_originalEntry);
+        _entries.Add(_editEntry);
+        _editEntry = null;
+        _originalEntry = null;
+    }
+}
