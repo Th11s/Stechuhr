@@ -25,7 +25,7 @@ namespace TimeKeeping.Web.Client
         public async Task<List<Entry>> GetToday()
         {
             var date = DateTimeOffset.Now;
-            return (await _client.GetBydateAsync(date)).ToList();
+            return (await _client.GetByDateAsync(date)).ToList();
         }
     }
 }
