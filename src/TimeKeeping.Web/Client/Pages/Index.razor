@@ -6,37 +6,39 @@
     <div class="col-12">
         <h1 class="text-center">Zeiterfassung</h1>
     </div>
-    <div class="col-12 col-md-5 col-xl-4 col-xxl-3">
-
-        <div class="d-grid gap-2">
-            <button @onclick="() => AddEntry(EntryType.WorkStart)" class="btn btn-outline-primary">Arbeitsanfang</button>
-            <button @onclick="() => AddEntry(EntryType.BreakStart)" class="btn btn-outline-primary">Pausenanfang</button>
-            <button @onclick="() => AddEntry(EntryType.BreakEnd)" class="btn btn-outline-primary">Pausenende</button>
-            <button @onclick="() => AddEntry(EntryType.WorkEnd)" class="btn btn-outline-primary">Arbeitsende</button>
-        </div>
-        <hr />
-        <div class="d-grid gap-2">
-            <button @onclick="() => _editEntry = new()" href="edit" class="btn btn-outline-secondary">Nachtrag</button>
-        </div>
-    </div>
-    <div class="col-12 col-md-5 col-xl-4 col-xxl-3">
-        @foreach (var entry in _entries.OrderBy(x => x.At))
-        {
-            <hr class="my-2" />
-            <div class="d-flex justify-content-between align-items-center">
-                <span>
-                    @entry.At.LocalDateTime.ToString("HH:mm") @entry.Type
-                </span>
-                <span>
-                    <button @onclick="() => EditEntry(entry)" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
-                </span>
+    <AwaitTask Task="_entriesTask">
+        <div class="col-12 col-md-5 col-xl-4 col-xxl-3">
+            <div class="d-grid gap-2">
+                <button @onclick="() => CreateEntry(EntryType.WorkStart)" class="btn btn-outline-primary">Arbeitsanfang</button>
+                <button @onclick="() => CreateEntry(EntryType.BreakStart)" class="btn btn-outline-primary">Pausenanfang</button>
+                <button @onclick="() => CreateEntry(EntryType.BreakEnd)" class="btn btn-outline-primary">Pausenende</button>
+                <button @onclick="() => CreateEntry(EntryType.WorkEnd)" class="btn btn-outline-primary">Arbeitsende</button>
             </div>
-        }
+            <hr />
+            <div class="d-grid gap-2">
+                <button @onclick="OpenAddition" href="edit" class="btn btn-outline-secondary">Nachtrag</button>
+            </div>
+        </div>
+        <div class="col-12 col-md-5 col-xl-4 col-xxl-3">
 
-        <div class=""></div>
-    </div>
+            @foreach (var entry in context.OrderBy(x => x.At))
+            {
+                <hr class="my-2" />
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>
+                        @entry.At.LocalDateTime.ToString("HH:mm") @entry.Type
+                    </span>
+                    <span>
+                        <button @onclick="() => OpenEdit(entry)" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                    </span>
+                </div>
+            }
+
+            <div class=""></div>
+        </div>
+    </AwaitTask>
 </div>
 @if (_editEntry != null) //TODO Modal?
 {
@@ -59,8 +61,11 @@
                 <input class="form-control" @bind="_editEntry.At" type="time" />
             </div>
 
-            <div @onclick="HandleSaveEntry" class="btn btn-primary">save</div>
-            <div @onclick="HandleDeleteEntry" class="btn btn-danger">remove</div>
+            <div @onclick="SaveEntry" class="btn btn-primary me-2">save</div>
+            @if (_originalEntry != null)
+            {
+                <div @onclick="DeleteEntry" class="btn btn-danger me-2">remove</div>
+            }
             <div @onclick="HandleClose" class="btn btn-secondary">close</div>
         </div>
     </div>
@@ -71,20 +76,28 @@
     [Inject]
     public AppStore AppStore { get; set; } = default!;
 
-    private List<Entry> _entries = new();
+    private List<Entry> _entries => _entriesTask?.IsCompletedSuccessfully == true ? _entriesTask.Result : throw new InvalidOperationException($"{nameof(_entries)} called in invalid state");
+    private Task<List<Entry>>? _entriesTask;
 
     private Entry? _originalEntry;
     private Entry? _editEntry;
 
-    public async Task AddEntry(EntryType type)
+    protected override void OnInitialized()
     {
-        var entry = new Entry(type, DateTimeOffset.Now);
+        base.OnInitialized();
 
-        await AppStore.Upsert(entry);
-        _entries.Add(entry);
+        _entriesTask = AppStore.GetToday();
+        _entriesTask.ContinueWith(_ => InvokeAsync(StateHasChanged));
     }
 
-    public void EditEntry(Entry entry)
+    public void OpenAddition()
+    {
+        _editEntry = new();
+        _originalEntry = null;
+    }
+       
+
+    public void OpenEdit(Entry entry)
     {
         _editEntry = new(entry.Type, entry.At, entry.Uuid);
         _originalEntry = entry;
@@ -96,9 +109,17 @@
         _editEntry = null;
     }
 
-    public async Task HandleDeleteEntry()
+    public async Task CreateEntry(EntryType type)
     {
-        if (_originalEntry == null) throw new InvalidOperationException($"{nameof(HandleSaveEntry)} called in invalid state");
+        var entry = new Entry(type, DateTimeOffset.Now);
+
+        await AppStore.Upsert(entry);
+        _entries.Add(entry);
+    }
+
+    public async Task DeleteEntry()
+    {
+        if (_originalEntry == null) throw new InvalidOperationException($"{nameof(DeleteEntry)} called in invalid state");
 
         await AppStore.RemoveEntry(_originalEntry);
         _entries.Remove(_originalEntry);
@@ -107,12 +128,14 @@
         _originalEntry = null;
     }
 
-    public async Task HandleSaveEntry()
+    public async Task SaveEntry()
     {
-        if (_editEntry == null || _originalEntry == null) throw new InvalidOperationException($"{nameof(HandleSaveEntry)} called in invalid state");
+        if (_editEntry == null) throw new InvalidOperationException($"{nameof(SaveEntry)} called in invalid state");
 
         await AppStore.Upsert(_editEntry);
-        _entries.Remove(_originalEntry);
+        if (_originalEntry != null)
+            _entries.Remove(_originalEntry);
+
         _entries.Add(_editEntry);
         _editEntry = null;
         _originalEntry = null;

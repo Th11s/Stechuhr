@@ -1,16 +1,23 @@
 using Microsoft.AspNetCore.ResponseCompression;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(opt =>
+    {
+        opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 builder.Services.AddRazorPages();
 
 builder.Services.AddSwaggerGen(o =>
 {
     o.CustomOperationIds(x => $"{x.ActionDescriptor.RouteValues["action"]}");
 });
+
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 

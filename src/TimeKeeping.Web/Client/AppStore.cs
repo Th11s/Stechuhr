@@ -1,17 +1,31 @@
-﻿using TimeKeeping.Web.Shared.HttpModel;
+﻿using TimeKeeping.Web.Client.Clients;
+using TimeKeeping.Web.Shared.HttpModel;
 
 namespace TimeKeeping.Web.Client
 {
     public class AppStore
     {
-        public Task Upsert(Entry entry)
+        private readonly TimeKeepingClient _client;
+
+        public AppStore(TimeKeepingClient client)
         {
-            return Task.Delay(11);
+            _client = client;
         }
 
-        public Task RemoveEntry(Entry entry)
+        public async Task Upsert(Entry entry)
         {
-            return Task.Delay(11);
+            await _client.UpsertEntryAsync(entry);
+        }
+
+        public async Task RemoveEntry(Entry entry)
+        {
+            await _client.DeleteEntryAsync(entry.Uuid);
+        }
+
+        public async Task<List<Entry>> GetToday()
+        {
+            var date = DateTimeOffset.Now;
+            return (await _client.GetBydateAsync(date)).ToList();
         }
     }
 }
