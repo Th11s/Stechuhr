@@ -38,7 +38,7 @@ namespace TimeKeeping.Web.Server.Controllers
         }
 
         [HttpGet("/date/{date}")]
-        public ActionResult<List<Entry>> GetBydate(DateTimeOffset date)
+        public ActionResult<List<Entry>> GetByDate(DateTimeOffset date)
         {
             return _cache.Get<List<Entry>>("items") ?? new();
         }
