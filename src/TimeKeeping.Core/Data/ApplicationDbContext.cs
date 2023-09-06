@@ -19,12 +19,45 @@ namespace Th11s.TimeKeeping.Data
             : base(options)
         { }
 
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Zeiterfassung>(e =>
+            {
+                e.OwnsOne(p => p.Stechzeit);
+                e.HasIndex(p => p.Stechzeit.Datum);
+            });
+
+            builder.Entity<Tagesdienstzeit>(e =>
+            {
+                e.HasKey(p => new { p.ArbeitnehmerId, p.AbteilungsId, p.Datum });
+            });
+        }
+
+
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+            VerarbeiteFehlendeUuid();
             VerarbeiteBerechneteFelder();
 
             return base.SaveChangesAsync(cancellationToken);
         }
+
+
+        public void VerarbeiteFehlendeUuid()
+        {
+            var entries = ChangeTracker.Entries()
+               .Where(x => EntityState.Added == x.State)
+               .Select(x => x.Entity)
+               .OfType<INutztUuidKey>()
+               .Where(x => x.Uuid == default);
+
+            foreach (var e in entries)
+                e.Uuid = Guid.NewGuid();
+        }
+
 
         public void VerarbeiteBerechneteFelder()
         {

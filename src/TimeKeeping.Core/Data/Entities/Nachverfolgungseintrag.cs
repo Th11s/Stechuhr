@@ -8,5 +8,4 @@
         int UserId,
         string UserName
         );
-    }
 }

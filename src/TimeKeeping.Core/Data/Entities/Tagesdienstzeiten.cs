@@ -2,13 +2,11 @@
 {
     public class Tagesdienstzeit : IBerechneteFeldPersistenz
     {
-        public Guid Uuid { get; set; }
-
         public int ArbeitnehmerId { get; set; }
         public int AbteilungsId { get; set; }
 
-
         public DateOnly Datum { get; set; }
+
 
         /// <summary>
         /// Enthält die geleistete Arbeitszeit für den Tag - Pausenzeiten sind bereits abgezogen.
@@ -22,8 +20,10 @@
 
         public TimeSpan Sollarbeitszeit { get; set; }
 
-
         public TimeSpan Zeitsaldo { get; set; }
+
+
+        public bool HatAusstehendeBerechnung { get; set; }
 
         public void BerechneFelder()
         {
