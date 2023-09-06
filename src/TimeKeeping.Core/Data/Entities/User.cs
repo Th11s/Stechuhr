@@ -1,12 +1,9 @@
-﻿namespace Th11s.TimeKeeping.Data.Entities
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace Th11s.TimeKeeping.Data.Entities
 {
-    public class User
+    public class User : IdentityUser
     {
-        public int Id { get; set; }
-
-        public string DisplayName { get; set; }
-        public string Email { get; set; }
-
-        public string? ExternalId { get; set; }
+        
     }
 }

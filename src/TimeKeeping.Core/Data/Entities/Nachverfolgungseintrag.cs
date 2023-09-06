@@ -1,11 +1,6 @@
 ﻿namespace Th11s.TimeKeeping.Data.Entities
 {
-    public class AuditCollection
-    {
-        public List<AuditEntry> Audits { get; set; } = new();
-    }
-    
-    public record AuditEntry(
+    public record Nachverfolgungseintrag(
         DateTimeOffset At,
         string Command,
         string Data,

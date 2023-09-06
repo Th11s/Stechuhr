@@ -1,8 +1,8 @@
 ﻿namespace Th11s.TimeKeeping.Data.Entities
 {
-    internal class OrgUnit
+    public class Abteilung
     {
-        public OrgUnit(string displayName)
+        public Abteilung(string displayName)
         {
             DisplayName = displayName;
         }
