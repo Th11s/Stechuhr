@@ -2,6 +2,13 @@
 {
     public class Arbeitnehmer : User
     {
+        /// <summary>
+        /// Aktuelles Stundensaldo über alle Arbeitszeiten
+        /// </summary>
         public TimeSpan Stundensaldo { get; set; }
+
+        //TODO: Änderungen am Stundensaldo erfassen
+
+        public TimeSpan Standardarbeitszeit { get; set; }
     }
 }

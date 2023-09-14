@@ -11,12 +11,12 @@
         /// <summary>
         /// Enthält die geleistete Arbeitszeit für den Tag - Pausenzeiten sind bereits abgezogen.
         /// </summary>
-        public TimeSpan Arbeitszeit { get; set; }
+        public TimeSpan? Arbeitszeit { get; set; }
 
         /// <summary>
         /// Enthält die Gesamtpausenzeit für den Tag.
         /// </summary>
-        public TimeSpan Pausenzeit { get; set; }
+        public TimeSpan? Pausenzeit { get; set; }
 
         public TimeSpan Sollarbeitszeit { get; set; }
 
@@ -27,7 +27,7 @@
 
         public void BerechneFelder()
         {
-            Zeitsaldo = Arbeitszeit - Sollarbeitszeit;
+            Zeitsaldo = (Arbeitszeit ?? TimeSpan.Zero) - Sollarbeitszeit;
         }
     }
 }
