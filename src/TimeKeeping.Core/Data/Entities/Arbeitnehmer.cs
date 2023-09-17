@@ -9,6 +9,6 @@
 
         //TODO: Änderungen am Stundensaldo erfassen
 
-        public TimeSpan Standardarbeitszeit { get; set; }
+        public TimeSpan Standarddienstzeit { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace Th11s.TimeKeeping.Data.Entities
 
         [ForeignKey(nameof(ArbeitnehmerId))]
         public Arbeitnehmer? Arbeitnehmer { get; set; }
-        public int ArbeitnehmerId { get; set; }
+        public string ArbeitnehmerId { get; set; }
 
         [ForeignKey(nameof(AbteilungsId))]
         public Abteilung? Abteilung { get; set; }
