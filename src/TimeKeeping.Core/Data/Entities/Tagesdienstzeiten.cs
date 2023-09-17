@@ -23,10 +23,15 @@ namespace Th11s.TimeKeeping.Data.Entities
 
 
         /// <summary>
-        /// Enthält die _geleistete_ Arbeitszeit für den Tag - Pausenzeiten sind bereits abgezogen.
+        /// Enthält die Arbeitszeit für den Tag
         /// </summary>
         public TimeSpan? Arbeitszeit { get; set; }
 
+        /// <summary>
+        /// Enthält die Gesamtpausenzeit für den Tag.
+        /// </summary>
+        public TimeSpan? Pausenzeit { get; set; }
+        public bool HatPausezeitminimum { get; set; }
 
         public TimeSpan Sollarbeitszeit { get; set; }
         public TimeSpan? Arbeitszeitgutschrift { get; set; }
@@ -34,10 +39,7 @@ namespace Th11s.TimeKeeping.Data.Entities
         public TimeSpan Zeitsaldo { get; set; } = TimeSpan.Zero;
 
 
-        /// <summary>
-        /// Enthält die Gesamtpausenzeit für den Tag.
-        /// </summary>
-        public TimeSpan? Pausenzeit { get; set; }
+        
 
 
         public string[] Probleme { get; set; } = Array.Empty<string>();
@@ -46,7 +48,11 @@ namespace Th11s.TimeKeeping.Data.Entities
 
         public void CalculateFields()
         {
-            Zeitsaldo = (Arbeitszeit ?? TimeSpan.Zero) + (Arbeitszeitgutschrift ?? TimeSpan.Zero) - Sollarbeitszeit;
+            Zeitsaldo = 
+                (Arbeitszeit ?? TimeSpan.Zero) - (Pausenzeit ?? TimeSpan.Zero) 
+                + (Arbeitszeitgutschrift ?? TimeSpan.Zero) 
+                - Sollarbeitszeit;
+
             HatProbleme = Probleme.Any();
         }
     }

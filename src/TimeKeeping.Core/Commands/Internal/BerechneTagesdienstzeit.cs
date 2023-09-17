@@ -2,8 +2,9 @@
 using JGUZDV.CQRS.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
+using Th11s.TimeKeeping.Configuration;
 using Th11s.TimeKeeping.Data;
 using Th11s.TimeKeeping.Data.Entities;
 
@@ -18,15 +19,18 @@ namespace Th11s.TimeKeeping.Commands.Internal
 
     internal class BerechneTagesdienstzeitHandler : CommandHandler<BerechneTagesdienstzeit, BerechneTagesdienstzeitHandler.CommandContext> {
         private readonly ApplicationDbContext _dbContext;
+        private readonly IOptions<StechzeitOptions> _options;
 
         public override ILogger Logger { get; }
 
 
         public BerechneTagesdienstzeitHandler(
             ApplicationDbContext dbContext,
+            IOptions<StechzeitOptions> options,
             ILogger<BerechneTagesdienstzeitHandler> logger)
         {
             _dbContext = dbContext;
+            _options = options;
             Logger = logger;
         }
 
@@ -57,13 +61,26 @@ namespace Th11s.TimeKeeping.Commands.Internal
 
             var probleme = new List<string>();
 
-            tagesdienstzeit.Pausenzeit = BerechneDauer(arbeitsAnfange, arbeitsEnden, probleme);
-            tagesdienstzeit.Arbeitszeit = BerechneDauer(arbeitsAnfange, arbeitsEnden, probleme) - tagesdienstzeit.Pausenzeit;
+            var pausenzeit = BerechneDauer(arbeitsAnfange, arbeitsEnden, probleme);
+            var arbeitszeit = BerechneDauer(arbeitsAnfange, arbeitsEnden, probleme);
+            
+            tagesdienstzeit.Arbeitszeit = arbeitszeit - pausenzeit;
             
             tagesdienstzeit.Probleme = probleme.ToArray();
+
+            var minimumPausenzeit = _options.Value.GetMinimalePause(arbeitszeit);
+            if(minimumPausenzeit > pausenzeit)
+            {
+                tagesdienstzeit.Pausenzeit = minimumPausenzeit;
+                tagesdienstzeit.HatPausezeitminimum = true;
+            }
+            else
+            {
+                tagesdienstzeit.Pausenzeit = pausenzeit;
+                tagesdienstzeit.HatPausezeitminimum = false;
+            }
             
-            //TODO: Pausenzeit kleiner Minimum?
-            //TODO: "Standardgutschriften" anwenden?
+            //TODO: "Standardgutschriften" anwenden
 
             
             await _dbContext.SaveChangesAsync(ct);
