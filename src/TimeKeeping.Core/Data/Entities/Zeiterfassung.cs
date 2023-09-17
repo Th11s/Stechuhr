@@ -2,7 +2,7 @@
 
 namespace Th11s.TimeKeeping.Data.Entities
 {
-    public class Zeiterfassung : INutztUuidKey
+    public class Zeiterfassung : IHasUuid
     {
         public Guid Uuid { get; set; }
 
@@ -26,7 +26,7 @@ namespace Th11s.TimeKeeping.Data.Entities
         /// <summary>
         /// True, wenn der Eintrag verändert, oder retrospektiv gespeichert wurde.
         /// </summary>
-        public bool IstNachgebucht { get; set; }
+        public bool HatNachbuchungen { get; set; }
 
         /// <summary>
         /// True, wenn der Eintrag durch einen Benutzer gelöscht wurde.

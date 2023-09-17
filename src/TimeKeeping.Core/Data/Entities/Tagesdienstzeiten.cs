@@ -1,6 +1,6 @@
 ﻿namespace Th11s.TimeKeeping.Data.Entities
 {
-    public class Tagesdienstzeit : IBerechneteFeldPersistenz
+    public class Tagesdienstzeit : IPersistCalculatedFields
     {
         public int ArbeitnehmerId { get; set; }
         public int AbteilungsId { get; set; }
@@ -25,7 +25,7 @@
 
         public bool HatAusstehendeBerechnung { get; set; }
 
-        public void BerechneFelder()
+        public void CalculateFields()
         {
             Zeitsaldo = (Arbeitszeit ?? TimeSpan.Zero) - Sollarbeitszeit;
         }

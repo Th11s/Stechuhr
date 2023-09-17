@@ -51,7 +51,7 @@ namespace Th11s.TimeKeeping.Data
             var entries = ChangeTracker.Entries()
                .Where(x => EntityState.Added == x.State)
                .Select(x => x.Entity)
-               .OfType<INutztUuidKey>()
+               .OfType<IHasUuid>()
                .Where(x => x.Uuid == default);
 
             foreach (var e in entries)
@@ -64,10 +64,10 @@ namespace Th11s.TimeKeeping.Data
             var entries = ChangeTracker.Entries()
                 .Where(x => new[] { EntityState.Added, EntityState.Modified }.Contains(x.State))
                 .Select(x => x.Entity)
-                .OfType<IBerechneteFeldPersistenz>();
+                .OfType<IPersistCalculatedFields>();
 
             foreach (var e in entries)
-                e.BerechneFelder();
+                e.CalculateFields();
         }
     }
 }
