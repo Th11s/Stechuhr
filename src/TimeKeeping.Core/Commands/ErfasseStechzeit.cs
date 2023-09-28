@@ -55,12 +55,11 @@ namespace Th11s.TimeKeeping.Commands
 
             var entry = new Zeiterfassung(command.ArbeitnehmerId, command.AbteilungsId)
             {
-                Stechzeit = new Stechzeit
-                {
-                    Datum = command.Datum,
-                    Zeitstempel = command.Stechzeit,
-                    Typ = command.Typ,
-                },
+                Stechzeit = new Stechzeit(
+                    command.Datum,
+                    command.Stechzeit,
+                    command.Typ
+                ),
 
                 IstNachbuchung = istNachgebucht,
                 IstVorausbuchung = istVorausgebucht,
