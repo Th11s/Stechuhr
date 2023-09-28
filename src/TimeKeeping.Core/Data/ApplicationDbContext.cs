@@ -34,14 +34,14 @@ namespace Th11s.TimeKeeping.Data
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            VerarbeiteFehlendeUuid();
-            VerarbeiteBerechneteFelder();
+            CreateMissingUuids();
+            CalculateMaterializedFields();
 
             return base.SaveChangesAsync(cancellationToken);
         }
 
 
-        public void VerarbeiteFehlendeUuid()
+        public void CreateMissingUuids()
         {
             var entries = ChangeTracker.Entries()
                .Where(x => EntityState.Added == x.State)
@@ -54,7 +54,7 @@ namespace Th11s.TimeKeeping.Data
         }
 
 
-        public void VerarbeiteBerechneteFelder()
+        public void CalculateMaterializedFields()
         {
             var entries = ChangeTracker.Entries()
                 .Where(x => new[] { EntityState.Added, EntityState.Modified }.Contains(x.State))
