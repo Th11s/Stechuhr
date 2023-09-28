@@ -43,6 +43,16 @@ namespace Th11s.TimeKeeping.Commands
             _options = options;
         }
 
+        protected override Task<bool> AuthorizeAsync(ErfasseStechzeit command, ClaimsPrincipal? principal, CancellationToken ct)
+        {
+#if DEBUG
+            Logger.LogError("AUTH NOT IMPLEMENTED!");
+            return Task.FromResult(true);
+#endif
+
+            return base.AuthorizeAsync(command, principal, ct);
+        }
+
         protected override async Task<HandlerResult> ExecuteInternalAsync(ErfasseStechzeit command, ClaimsPrincipal? principal, CancellationToken ct)
         {
             // TODO: Mit Aaron besprechen, was gespeichert werden sollte. Vermutlich "lokales Datum" + DateTimeOffset als "echter" zeitstempel.
