@@ -26,13 +26,8 @@ namespace Th11s.TimeKeeping.Data
 
             builder.Entity<Zeiterfassung>(e =>
             {
-                e.OwnsOne(p => p.Stechzeit);
+                e.ComplexProperty(p => p.Stechzeit);
                 e.HasIndex(p => p.Stechzeit.Datum);
-            });
-
-            builder.Entity<Tagesdienstzeit>(e =>
-            {
-                e.HasKey(p => new { p.ArbeitnehmerId, p.AbteilungsId, p.Datum });
             });
         }
 

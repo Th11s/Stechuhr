@@ -3,6 +3,7 @@ using JGUZDV.CQRS.Commands;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
+using Th11s.TimeKeeping.Commands.Internal;
 using Th11s.TimeKeeping.Configuration;
 using Th11s.TimeKeeping.Data;
 using Th11s.TimeKeeping.Data.Entities;
@@ -11,10 +12,10 @@ namespace Th11s.TimeKeeping.Commands
 {
     public record ErfasseStechzeit(
         DateOnly Datum,
-        TimeOnly Uhrzeit,
+        DateTimeOffset Stechzeit,
         StechTyp Typ,
 
-        int ArbeitnehmerId,
+        string ArbeitnehmerId,
         int AbteilungsId
         ) : ICommand
     { }
@@ -23,6 +24,7 @@ namespace Th11s.TimeKeeping.Commands
     {
         private readonly TimeProvider _timeProvider;
         private readonly ApplicationDbContext _dbContext;
+        private readonly ICommandHandler<BerechneTagesdienstzeit> _tagesdienstzeitBerechnung;
         private readonly IOptions<StechzeitOptions> _options;
 
         public override ILogger Logger { get; }
@@ -30,54 +32,56 @@ namespace Th11s.TimeKeeping.Commands
         public ErfasseStechzeitHandler(
             TimeProvider timeProvider,
             ApplicationDbContext dbContext,
+            ICommandHandler<BerechneTagesdienstzeit> tagesdienstzeitBerechnung,
             ILogger<ErfasseStechzeitHandler> logger,
             IOptions<StechzeitOptions> options)
         {
             _timeProvider = timeProvider;
             _dbContext = dbContext;
+            _tagesdienstzeitBerechnung = tagesdienstzeitBerechnung;
             Logger = logger;
             _options = options;
         }
 
         protected override async Task<HandlerResult> ExecuteInternalAsync(ErfasseStechzeit command, ClaimsPrincipal? principal, CancellationToken ct)
         {
-            var stechzeit = command.Datum.ToDateTime(command.Uhrzeit);
-            var istNachgebucht = Math.Abs((stechzeit - _timeProvider.GetLocalNow()).TotalMinutes) > _options.;
+            // TODO: Mit Aaron besprechen, was gespeichert werden sollte. Vermutlich "lokales Datum" + DateTimeOffset als "echter" zeitstempel.
+            var stechzeit = command.Stechzeit;
+            var uhrabweichung = (stechzeit.ToUniversalTime() - _timeProvider.GetUtcNow()).TotalMinutes;
+            var maxUhrabweichung = _options.Value.Nachbuchungsschwelle.TotalMinutes;
 
-            var entry = new Zeiterfassung
+            var istNachgebucht = uhrabweichung > maxUhrabweichung;
+            var istVorausgebucht = uhrabweichung < maxUhrabweichung;
+
+            var entry = new Zeiterfassung(command.ArbeitnehmerId, command.AbteilungsId)
             {
-                ArbeitnehmerId = command.ArbeitnehmerId,
-                AbteilungsId = command.AbteilungsId,
-
                 Stechzeit = new Stechzeit
                 {
                     Datum = command.Datum,
-                    Uhrzeit = command.Uhrzeit,
+                    Zeitstempel = command.Stechzeit,
                     Typ = command.Typ,
                 },
 
-                HatNachbuchungen = istNachgebucht,
+                IstNachbuchung = istNachgebucht,
+                IstVorausbuchung = istVorausgebucht,
+
                 // TODO: Nachverfolgung = 
+                LastModified = _timeProvider.GetUtcNow()
             };
 
             _dbContext.Zeiterfassung.Add(entry);
             await _dbContext.SaveChangesAsync(ct);
 
-
-            _dbContext.UpdateTagesdienstzeit()
-            // TODO: prüfen, ob das ein korrektes Update-Statement für einen existierenden Eintrag erzeugt.
-            var tagesdienszeit = new Tagesdienstzeit
+            try
             {
-                ArbeitnehmerId = command.ArbeitnehmerId,
-                AbteilungsId = command.AbteilungsId,
-                Datum = command.Datum,
-
-                HatAusstehendeBerechnung = true,
-            };
-
-            _dbContext.Update(tagesdienszeit);
-
-            await _dbContext.SaveChangesAsync(ct);
+                await _tagesdienstzeitBerechnung.ExecuteAsync(new BerechneTagesdienstzeit(entry.ArbeitnehmerId, entry.AbteilungsId, entry.Stechzeit.Datum), ct);
+            }
+            catch (Exception ex)
+            {
+                //TODO: Tagesdienstzeit per "maintenance" erneut berechnen.
+                // Benutzer informieren, dass seine Dienstzeit evtl. unpräzise ist.
+            }
+            
             return HandlerResult.Success();
         }
     }

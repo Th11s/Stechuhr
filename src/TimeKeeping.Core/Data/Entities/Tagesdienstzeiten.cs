@@ -1,7 +1,8 @@
-﻿using System.Runtime.Intrinsics.X86;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Th11s.TimeKeeping.Data.Entities
 {
+    [PrimaryKey(nameof(ArbeitnehmerId), nameof(AbteilungsId), nameof(Datum))]
     public class Tagesdienstzeit : IPersistCalculatedFields
     {
         public Tagesdienstzeit(
@@ -22,6 +23,9 @@ namespace Th11s.TimeKeeping.Data.Entities
         public DateOnly Datum { get; set; }
 
 
+        public DateTimeOffset LastModified { get; set; }
+
+
         /// <summary>
         /// Enthält die Arbeitszeit für den Tag
         /// </summary>
@@ -36,10 +40,7 @@ namespace Th11s.TimeKeeping.Data.Entities
         public TimeSpan Sollarbeitszeit { get; set; }
         public TimeSpan? Arbeitszeitgutschrift { get; set; }
 
-        public TimeSpan Zeitsaldo { get; set; } = TimeSpan.Zero;
-
-
-        
+        public TimeSpan Zeitsaldo { get; private set; } = TimeSpan.Zero;
 
 
         public string[] Probleme { get; set; } = Array.Empty<string>();
