@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Th11s.TimeKeeping.Data.Entities;
 
 namespace Th11s.TimeKeeping.Data
@@ -15,7 +16,7 @@ namespace Th11s.TimeKeeping.Data
 
 
 
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public ApplicationDbContext(DbContextOptions options)
             : base(options)
         { }
 
@@ -27,7 +28,8 @@ namespace Th11s.TimeKeeping.Data
             builder.Entity<Zeiterfassung>(e =>
             {
                 e.ComplexProperty(p => p.Stechzeit);
-                e.HasIndex(p => p.Stechzeit.Datum);
+
+                //TODO e.HasIndex(p => p.Stechzeit.Datum);
             });
         }
 
@@ -63,6 +65,45 @@ namespace Th11s.TimeKeeping.Data
 
             foreach (var e in entries)
                 e.CalculateFields();
+        }
+    }
+
+    public class NpgsqlDbContext : ApplicationDbContext
+    {
+        public NpgsqlDbContext(DbContextOptions<NpgsqlDbContext> options)
+            : base(options)
+        { }
+
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Zeiterfassung>(
+                e =>
+                {
+                    e.Property(p => p.Nachverfolgung)
+                        .HasColumnType("jsonb");
+                });
+        }
+    }
+
+    public class SqlServerDbContext : ApplicationDbContext
+    {
+        public SqlServerDbContext(DbContextOptions<SqlServerDbContext> options)
+            : base(options)
+        { }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Zeiterfassung>(
+                e =>
+                {
+                    e.OwnsMany(p => p.Nachverfolgung)
+                        .ToJson();
+                });
         }
     }
 }

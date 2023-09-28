@@ -1,8 +1,31 @@
-using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
+using Th11s.TimeKeeping.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+var dbProvider = builder.Configuration.GetValue("DatabaseProvider", "npgsql");
+switch(dbProvider)
+{
+    case "Npgsql":
+        builder.Services.AddDbContext<NpgsqlDbContext>(
+        dbContext =>
+        {
+            dbContext.UseNpgsql(builder.Configuration.GetConnectionString("npgsql"));
+        });
+
+        builder.Services.AddScoped<ApplicationDbContext, NpgsqlDbContext>();
+        break;
+
+    case "SqlServer":
+        builder.Services.AddDbContext<SqlServerDbContext>(
+        dbContext =>
+        {
+            dbContext.UseSqlServer(builder.Configuration.GetConnectionString("sqlserver"));
+        });
+
+        builder.Services.AddScoped<ApplicationDbContext, SqlServerDbContext>();
+        break;
+}
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
