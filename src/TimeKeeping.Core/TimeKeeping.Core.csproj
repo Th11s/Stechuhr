@@ -16,4 +16,8 @@
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0-rc.1" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\TimeKeeping.Web\Shared\TimeKeeping.Web.Shared.csproj" />
+	</ItemGroup>
+
 </Project>

@@ -7,7 +7,6 @@
 
     public enum StechTyp
     {
-        Undefiniert,
         Arbeitsbeginn,
         Arbeitsende,
         Pausenbeginn,
