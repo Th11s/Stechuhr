@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Th11s.TimeKeeping.Data.Entities;
 
 namespace Th11s.TimeKeeping.Data
@@ -15,7 +16,54 @@ namespace Th11s.TimeKeeping.Data
 
 
 
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public ApplicationDbContext(DbContextOptions options)
+            : base(options)
+        { }
+
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+        }
+
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            CreateMissingUuids();
+            CalculateMaterializedFields();
+
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+
+        public void CreateMissingUuids()
+        {
+            var entries = ChangeTracker.Entries()
+               .Where(x => EntityState.Added == x.State)
+               .Select(x => x.Entity)
+               .OfType<IHasUuid>()
+               .Where(x => x.Uuid == default);
+
+            foreach (var e in entries)
+                e.Uuid = Guid.NewGuid();
+        }
+
+
+        public void CalculateMaterializedFields()
+        {
+            var entries = ChangeTracker.Entries()
+                .Where(x => new[] { EntityState.Added, EntityState.Modified }.Contains(x.State))
+                .Select(x => x.Entity)
+                .OfType<IPersistCalculatedFields>();
+
+            foreach (var e in entries)
+                e.CalculateFields();
+        }
+    }
+
+    public class NpgsqlDbContext : ApplicationDbContext
+    {
+        public NpgsqlDbContext(DbContextOptions<NpgsqlDbContext> options)
             : base(options)
         { }
 
@@ -24,50 +72,31 @@ namespace Th11s.TimeKeeping.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<Zeiterfassung>(e =>
-            {
-                e.OwnsOne(p => p.Stechzeit);
-                e.HasIndex(p => p.Stechzeit.Datum);
-            });
-
-            builder.Entity<Tagesdienstzeit>(e =>
-            {
-                e.HasKey(p => new { p.ArbeitnehmerId, p.AbteilungsId, p.Datum });
-            });
+            builder.Entity<Zeiterfassung>(
+                e =>
+                {
+                    e.Property(p => p.Nachverfolgung)
+                        .HasColumnType("jsonb");
+                });
         }
+    }
 
+    public class SqlServerDbContext : ApplicationDbContext
+    {
+        public SqlServerDbContext(DbContextOptions<SqlServerDbContext> options)
+            : base(options)
+        { }
 
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            VerarbeiteFehlendeUuid();
-            VerarbeiteBerechneteFelder();
+            base.OnModelCreating(builder);
 
-            return base.SaveChangesAsync(cancellationToken);
-        }
-
-
-        public void VerarbeiteFehlendeUuid()
-        {
-            var entries = ChangeTracker.Entries()
-               .Where(x => EntityState.Added == x.State)
-               .Select(x => x.Entity)
-               .OfType<INutztUuidKey>()
-               .Where(x => x.Uuid == default);
-
-            foreach (var e in entries)
-                e.Uuid = Guid.NewGuid();
-        }
-
-
-        public void VerarbeiteBerechneteFelder()
-        {
-            var entries = ChangeTracker.Entries()
-                .Where(x => new[] { EntityState.Added, EntityState.Modified }.Contains(x.State))
-                .Select(x => x.Entity)
-                .OfType<IBerechneteFeldPersistenz>();
-
-            foreach (var e in entries)
-                e.BerechneFelder();
+            builder.Entity<Zeiterfassung>(
+                e =>
+                {
+                    e.OwnsMany(p => p.Nachverfolgung)
+                        .ToJson();
+                });
         }
     }
 }

@@ -1,11 +1,15 @@
-using Microsoft.AspNetCore.ResponseCompression;
+using Th11s.TimeKeeping;
+using TimeKeeping.Web.Server.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddCoreServices(builder.Configuration);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -28,9 +32,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseMinimalApi();
 
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.Run();

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Th11s.TimeKeeping.SharedModel.Primitives;
 
 namespace TimeKeeping.Web.Shared.HttpModel;
 
@@ -13,22 +14,22 @@ public class EntryCollection : IValidatableObject
         var workCount = 0;
         foreach (var entry in Entries.OrderBy(x => x.At))
         {
-            if (entry.Type == EntryType.WorkStart)
+            if (entry.Type == Stempeltyp.Arbeitsanfang)
             {
                 workCount++;
             }
 
-            if (entry.Type == EntryType.WorkEnd)
+            if (entry.Type == Stempeltyp.Arbeitsende)
             {
                 workCount--;
             }
 
-            if (entry.Type == EntryType.BreakStart)
+            if (entry.Type == Stempeltyp.Pausenanfang)
             {
                 pauseCount++;
             }
 
-            if (entry.Type == EntryType.BreakEnd)
+            if (entry.Type == Stempeltyp.Pausenende)
             {
                 pauseCount--;
             }

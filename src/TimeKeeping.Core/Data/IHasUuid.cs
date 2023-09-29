@@ -1,6 +1,6 @@
 ﻿namespace Th11s.TimeKeeping.Data
 {
-    public interface INutztUuidKey
+    public interface IHasUuid
     {
         Guid Uuid { get; set; }
     }
