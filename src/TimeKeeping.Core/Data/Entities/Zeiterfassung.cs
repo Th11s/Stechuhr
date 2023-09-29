@@ -68,13 +68,13 @@ namespace Th11s.TimeKeeping.Data.Entities
 
 
         [NotMapped]
-        public bool IstArbeitsbeginn => Stempeltyp == Stempeltyp.Arbeitsbeginn;
+        public bool IstArbeitsbeginn => Stempeltyp == Stempeltyp.Arbeitsanfang;
         
         [NotMapped] 
         public bool IstArbeitsende => Stempeltyp == Stempeltyp.Arbeitsende;
         
         [NotMapped] 
-        public bool IstPausenbeginn => Stempeltyp == Stempeltyp.Pausenbeginn;
+        public bool IstPausenbeginn => Stempeltyp == Stempeltyp.Pausenanfang;
         
         [NotMapped] 
         public bool IstPausenende => Stempeltyp == Stempeltyp.Pausenende;

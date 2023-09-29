@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
@@ -6,6 +6,10 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>Th11s.TimeKeeping.HttpModel</RootNamespace>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\TimeKeeping.SharedModel\TimeKeeping.SharedModel.csproj" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<SupportedPlatform Include="browser" />

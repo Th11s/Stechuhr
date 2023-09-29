@@ -1,34 +1,15 @@
-using Microsoft.EntityFrameworkCore;
-using Th11s.TimeKeeping.Data;
+using Th11s.TimeKeeping;
+using TimeKeeping.Web.Server.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var dbProvider = builder.Configuration.GetValue("DatabaseProvider", "npgsql");
-switch(dbProvider)
-{
-    case "Npgsql":
-        builder.Services.AddDbContext<NpgsqlDbContext>(
-        dbContext =>
-        {
-            dbContext.UseNpgsql(builder.Configuration.GetConnectionString("npgsql"));
-        });
-
-        builder.Services.AddScoped<ApplicationDbContext, NpgsqlDbContext>();
-        break;
-
-    case "SqlServer":
-        builder.Services.AddDbContext<SqlServerDbContext>(
-        dbContext =>
-        {
-            dbContext.UseSqlServer(builder.Configuration.GetConnectionString("sqlserver"));
-        });
-
-        builder.Services.AddScoped<ApplicationDbContext, SqlServerDbContext>();
-        break;
-}
+builder.Services.AddCoreServices(builder.Configuration);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -51,9 +32,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseMinimalApi();
 
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.Run();

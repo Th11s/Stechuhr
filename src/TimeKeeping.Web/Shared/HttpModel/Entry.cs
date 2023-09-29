@@ -1,4 +1,6 @@
-﻿namespace TimeKeeping.Web.Shared.HttpModel;
+﻿using Th11s.TimeKeeping.SharedModel.Primitives;
+
+namespace TimeKeeping.Web.Shared.HttpModel;
 
 public class Entry
 {
@@ -6,14 +8,14 @@ public class Entry
     {
         
     }
-    public Entry(EntryType type, DateTimeOffset at, Guid? uuid = null)
+    public Entry(Stempeltyp type, DateTimeOffset at, Guid? uuid = null)
     {
         Type = type;
         At = at;
         Uuid = uuid ?? Guid.NewGuid();
     }
 
-    public EntryType Type { get; set; }
+    public Stempeltyp Type { get; set; }
     public DateTimeOffset At { get; set; }
     public Guid Uuid { get; }
 }

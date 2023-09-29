@@ -3,9 +3,9 @@
     public enum Stempeltyp
     {
         Undefiniert,
-        Arbeitsbeginn,
+        Arbeitsanfang,
         Arbeitsende,
-        Pausenbeginn,
+        Pausenanfang,
         Pausenende
     }
 }

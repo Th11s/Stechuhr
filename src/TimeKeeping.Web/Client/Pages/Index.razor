@@ -9,10 +9,10 @@
     <div class="col-12 col-md-5 col-xl-4 col-xxl-3">
 
         <div class="d-grid gap-2">
-            <button @onclick="() => AddEntry(EntryType.WorkStart)" class="btn btn-outline-primary">Arbeitsanfang</button>
-            <button @onclick="() => AddEntry(EntryType.BreakStart)" class="btn btn-outline-primary">Pausenanfang</button>
-            <button @onclick="() => AddEntry(EntryType.BreakEnd)" class="btn btn-outline-primary">Pausenende</button>
-            <button @onclick="() => AddEntry(EntryType.WorkEnd)" class="btn btn-outline-primary">Arbeitsende</button>
+            <button @onclick="() => AddEntry(Stempeltyp.Arbeitsanfang)" class="btn btn-outline-primary">Arbeitsanfang</button>
+            <button @onclick="() => AddEntry(Stempeltyp.Pausenanfang)" class="btn btn-outline-primary">Pausenanfang</button>
+            <button @onclick="() => AddEntry(Stempeltyp.Pausenende)" class="btn btn-outline-primary">Pausenende</button>
+            <button @onclick="() => AddEntry(Stempeltyp.Arbeitsende)" class="btn btn-outline-primary">Arbeitsende</button>
         </div>
         <hr />
         <div class="d-grid gap-2">
@@ -47,7 +47,7 @@
             <div class="mb-2">
                 <label>Art</label>
                 <select @bind="_editEntry.Type" class="form-select">
-                    @foreach (var type in Enum.GetValues<EntryType>())
+                    @foreach (var type in Enum.GetValues<Stempeltyp>())
                     {
                         <option selected="@(type == _editEntry.Type)" value="@type">@type</option>
                     }
@@ -76,7 +76,7 @@
     private Entry? _originalEntry;
     private Entry? _editEntry;
 
-    public async Task AddEntry(EntryType type)
+    public async Task AddEntry(Stempeltyp type)
     {
         var entry = new Entry(type, DateTimeOffset.Now);
 
