@@ -1,4 +1,6 @@
-﻿namespace Th11s.TimeKeeping.HttpModel
+﻿using Th11s.TimeKeeping.SharedModel.Primitives;
+
+namespace Th11s.TimeKeeping.SharedModel.Web
 {
     public record Tagessicht(
         DateOnly Datum,
@@ -22,18 +24,10 @@
     public record Stechzeit(
         Guid Uuid,
         DateTimeOffset Zeitstempel,
-        StechTyp Stechtyp,
+        Stempeltyp Stechtyp,
         bool IstNachbuchung,
         bool IstVorausbuchung,
         bool HatAnpassungen,
         bool IstEntfernt
         );
-
-    public enum StechTyp
-    {
-        Arbeitsbeginn,
-        Arbeitsende,
-        Pausenbeginn,
-        Pausenende
-    }
 }

@@ -17,7 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\TimeKeeping.Web\Shared\TimeKeeping.Web.Shared.csproj" />
+	  <ProjectReference Include="..\TimeKeeping.SharedModel\TimeKeeping.SharedModel.csproj" />
 	</ItemGroup>
 
 </Project>

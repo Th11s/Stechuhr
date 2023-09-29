@@ -24,13 +24,6 @@ namespace Th11s.TimeKeeping.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-
-            builder.Entity<Zeiterfassung>(e =>
-            {
-                e.ComplexProperty(p => p.Stechzeit);
-
-                //TODO e.HasIndex(p => p.Stechzeit.Datum);
-            });
         }
 
 

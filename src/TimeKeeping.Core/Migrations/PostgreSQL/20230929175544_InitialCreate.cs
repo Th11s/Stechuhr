@@ -206,14 +206,14 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                     LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     ArbeitnehmerId = table.Column<string>(type: "text", nullable: false),
                     AbteilungsId = table.Column<int>(type: "integer", nullable: false),
+                    Datum = table.Column<DateOnly>(type: "date", nullable: false),
+                    Zeitstempel = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Stempeltyp = table.Column<int>(type: "integer", nullable: false),
                     Nachverfolgung = table.Column<Nachverfolgungseintrag[]>(type: "jsonb", nullable: true),
                     IstNachbuchung = table.Column<bool>(type: "boolean", nullable: false),
                     IstVorausbuchung = table.Column<bool>(type: "boolean", nullable: false),
                     HatAnpassungen = table.Column<bool>(type: "boolean", nullable: false),
-                    IstEntfernt = table.Column<bool>(type: "boolean", nullable: false),
-                    Stechzeit_Datum = table.Column<DateOnly>(type: "date", nullable: false),
-                    Stechzeit_Typ = table.Column<int>(type: "integer", nullable: false),
-                    Stechzeit_Zeitstempel = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    IstEntfernt = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -278,6 +278,11 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                 name: "IX_Zeiterfassung_ArbeitnehmerId",
                 table: "Zeiterfassung",
                 column: "ArbeitnehmerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Zeiterfassung_Datum",
+                table: "Zeiterfassung",
+                column: "Datum");
         }
 
         /// <inheritdoc />

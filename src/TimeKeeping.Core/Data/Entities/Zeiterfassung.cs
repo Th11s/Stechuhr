@@ -1,14 +1,27 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
+using Th11s.TimeKeeping.SharedModel.Primitives;
 
 namespace Th11s.TimeKeeping.Data.Entities
 {
+    [Index(nameof(Datum))]
     public class Zeiterfassung : IHasUuid
     {
         public Zeiterfassung(string arbeitnehmerId, int abteilungsId)
         {
             ArbeitnehmerId = arbeitnehmerId ?? throw new ArgumentNullException(nameof(arbeitnehmerId));
             AbteilungsId = abteilungsId;
+        }
+
+        [SetsRequiredMembers]
+        public Zeiterfassung(string arbeitnehmerId, int abteilungsId, DateOnly datum, DateTimeOffset zeitstempel, Stempeltyp stechTyp) 
+            : this(arbeitnehmerId, abteilungsId)
+        {
+            Datum = datum;
+            Zeitstempel = zeitstempel;
+            Stempeltyp = stechTyp;
         }
 
         [Key]
@@ -25,7 +38,9 @@ namespace Th11s.TimeKeeping.Data.Entities
         public int AbteilungsId { get; set; }
 
 
-        public required Stechzeit Stechzeit { get; set; }
+        public required DateOnly Datum { get; set; }
+        public required DateTimeOffset Zeitstempel { get; set; }
+        public required Stempeltyp Stempeltyp { get; set; }
 
         /// <summary>
         /// Enthält den gesamten Audit zum Eintrag.
@@ -50,5 +65,18 @@ namespace Th11s.TimeKeeping.Data.Entities
         /// Weitere Änderungen am Eintrag sind dadruch verhindert
         /// </summary>
         public bool IstEntfernt { get; set; }
+
+
+        [NotMapped]
+        public bool IstArbeitsbeginn => Stempeltyp == Stempeltyp.Arbeitsbeginn;
+        
+        [NotMapped] 
+        public bool IstArbeitsende => Stempeltyp == Stempeltyp.Arbeitsende;
+        
+        [NotMapped] 
+        public bool IstPausenbeginn => Stempeltyp == Stempeltyp.Pausenbeginn;
+        
+        [NotMapped] 
+        public bool IstPausenende => Stempeltyp == Stempeltyp.Pausenende;
     }
 }

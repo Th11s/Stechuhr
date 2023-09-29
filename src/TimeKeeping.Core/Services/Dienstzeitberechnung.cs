@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Th11s.TimeKeeping.Data;
+﻿using Th11s.TimeKeeping.Data;
 
 namespace Th11s.TimeKeeping.Services
 {

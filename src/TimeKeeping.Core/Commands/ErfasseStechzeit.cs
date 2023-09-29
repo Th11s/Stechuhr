@@ -7,13 +7,14 @@ using Th11s.TimeKeeping.Commands.Internal;
 using Th11s.TimeKeeping.Configuration;
 using Th11s.TimeKeeping.Data;
 using Th11s.TimeKeeping.Data.Entities;
+using Th11s.TimeKeeping.SharedModel.Primitives;
 
 namespace Th11s.TimeKeeping.Commands
 {
     public record ErfasseStechzeit(
         DateOnly Datum,
         DateTimeOffset Stechzeit,
-        StechTyp Typ,
+        Stempeltyp Typ,
 
         string ArbeitnehmerId,
         int AbteilungsId
@@ -63,14 +64,13 @@ namespace Th11s.TimeKeeping.Commands
             var istNachgebucht = uhrabweichung > maxUhrabweichung;
             var istVorausgebucht = uhrabweichung < maxUhrabweichung;
 
-            var entry = new Zeiterfassung(command.ArbeitnehmerId, command.AbteilungsId)
+            var entry = new Zeiterfassung(
+                command.ArbeitnehmerId, 
+                command.AbteilungsId,
+                command.Datum,
+                command.Stechzeit,
+                command.Typ)
             {
-                Stechzeit = new Stechzeit(
-                    command.Datum,
-                    command.Stechzeit,
-                    command.Typ
-                ),
-
                 IstNachbuchung = istNachgebucht,
                 IstVorausbuchung = istVorausgebucht,
 
@@ -83,7 +83,7 @@ namespace Th11s.TimeKeeping.Commands
 
             try
             {
-                await _tagesdienstzeitBerechnung.ExecuteAsync(new BerechneTagesdienstzeit(entry.ArbeitnehmerId, entry.AbteilungsId, entry.Stechzeit.Datum), ct);
+                await _tagesdienstzeitBerechnung.ExecuteAsync(new BerechneTagesdienstzeit(entry.ArbeitnehmerId, entry.AbteilungsId, entry.Datum), ct);
             }
             catch (Exception ex)
             {

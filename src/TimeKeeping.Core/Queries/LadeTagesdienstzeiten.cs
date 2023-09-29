@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using Th11s.TimeKeeping.Data;
-using Th11s.TimeKeeping.HttpModel;
+using Th11s.TimeKeeping.SharedModel.Web;
 
 namespace Th11s.TimeKeeping.Queries;
 
@@ -52,12 +52,12 @@ internal class LadeTagesdienstzeitenHandler : QueryHandler<LadeTagesdienstzeiten
             .Where(x => 
                 x.ArbeitnehmerId == query.ArbeitnehmerId &&
                 x.AbteilungsId == query.AbteilungsId &&
-                x.Stechzeit.Datum == query.Datum
+                x.Datum == query.Datum
             )
             .Select(x => new Stechzeit(
                 x.Uuid,
-                x.Stechzeit.Zeitstempel,
-                (StechTyp)(int)x.Stechzeit.Typ, //TODO enum translation...
+                x.Zeitstempel,
+                x.Stempeltyp,
                 x.IstNachbuchung,
                 x.IstVorausbuchung,
                 x.HatAnpassungen,

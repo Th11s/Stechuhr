@@ -49,8 +49,7 @@ namespace Th11s.TimeKeeping.Data.Entities
 
         public void CalculateFields()
         {
-            Zeitsaldo = 
-                (Arbeitszeit ?? TimeSpan.Zero) - (Pausenzeit ?? TimeSpan.Zero) 
+            Zeitsaldo = (Arbeitszeit ?? TimeSpan.Zero)
                 + (Arbeitszeitgutschrift ?? TimeSpan.Zero) 
                 - Sollarbeitszeit;
 

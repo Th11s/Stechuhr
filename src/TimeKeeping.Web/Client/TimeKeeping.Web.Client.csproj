@@ -13,15 +13,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shared\TimeKeeping.Web.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Components\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\TimeKeeping.SharedModel\TimeKeeping.SharedModel.csproj" />
+    <ProjectReference Include="..\Shared\TimeKeeping.Web.Shared.csproj" />
   </ItemGroup>
 
 </Project>

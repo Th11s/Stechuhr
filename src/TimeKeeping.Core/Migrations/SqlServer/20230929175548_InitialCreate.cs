@@ -204,13 +204,13 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
                     LastModified = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     ArbeitnehmerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     AbteilungsId = table.Column<int>(type: "int", nullable: false),
+                    Datum = table.Column<DateOnly>(type: "date", nullable: false),
+                    Zeitstempel = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    Stempeltyp = table.Column<int>(type: "int", nullable: false),
                     IstNachbuchung = table.Column<bool>(type: "bit", nullable: false),
                     IstVorausbuchung = table.Column<bool>(type: "bit", nullable: false),
                     HatAnpassungen = table.Column<bool>(type: "bit", nullable: false),
                     IstEntfernt = table.Column<bool>(type: "bit", nullable: false),
-                    Stechzeit_Datum = table.Column<DateOnly>(type: "date", nullable: false),
-                    Stechzeit_Typ = table.Column<int>(type: "int", nullable: false),
-                    Stechzeit_Zeitstempel = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     Nachverfolgung = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -278,6 +278,11 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
                 name: "IX_Zeiterfassung_ArbeitnehmerId",
                 table: "Zeiterfassung",
                 column: "ArbeitnehmerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Zeiterfassung_Datum",
+                table: "Zeiterfassung",
+                column: "Datum");
         }
 
         /// <inheritdoc />
