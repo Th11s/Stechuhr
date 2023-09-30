@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Th11s.TimeKeeping.Data.Entities
 {
@@ -7,7 +8,7 @@ namespace Th11s.TimeKeeping.Data.Entities
     {
         public Tagesdienstzeit(
             string arbeitnehmerId,
-            int abteilungsId,
+            string abteilungsId,
             DateOnly datum,
             TimeSpan sollarbeitszeit)
         {
@@ -17,8 +18,16 @@ namespace Th11s.TimeKeeping.Data.Entities
             Sollarbeitszeit = sollarbeitszeit;
         }
 
+
+        [ForeignKey(nameof(ArbeitnehmerId))]
+        public Arbeitnehmer Arbeitnehmer { get; set; }
         public string ArbeitnehmerId { get; set; }
-        public int AbteilungsId { get; set; }
+
+
+        [ForeignKey(nameof(AbteilungsId))]
+        public Abteilung Abteilung { get; set; }
+        public string AbteilungsId { get; set; }
+
 
         public DateOnly Datum { get; set; }
 

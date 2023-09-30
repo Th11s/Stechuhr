@@ -17,7 +17,7 @@ namespace Th11s.TimeKeeping.Commands
         Stempeltyp Typ,
 
         string ArbeitnehmerId,
-        int AbteilungsId
+        string AbteilungsId
         ) : ICommand
     { }
 
@@ -85,7 +85,7 @@ namespace Th11s.TimeKeeping.Commands
             {
                 await _tagesdienstzeitBerechnung.ExecuteAsync(new BerechneTagesdienstzeit(entry.ArbeitnehmerId, entry.AbteilungsId, entry.Datum), ct);
             }
-            catch (Exception ex)
+            catch
             {
                 //TODO: Tagesdienstzeit per "maintenance" erneut berechnen.
                 // Benutzer informieren, dass seine Dienstzeit evtl. unpräzise ist.

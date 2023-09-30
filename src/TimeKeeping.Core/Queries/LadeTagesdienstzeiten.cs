@@ -7,21 +7,14 @@ using Th11s.TimeKeeping.SharedModel.Web;
 
 namespace Th11s.TimeKeeping.Queries;
 
-public class LadeTagesdienstzeiten : IQuery<Tagessicht>
+public class LadeTagesdienstzeiten(DateOnly datum, string arbeitnehmerId, string abteilungsId) : IQuery<Tagessicht>
 {
-    public LadeTagesdienstzeiten(DateOnly datum, string arbeitnehmerId, int abteilungsId)
-    {
-        Datum = datum;
-        ArbeitnehmerId = arbeitnehmerId ?? throw new ArgumentNullException(nameof(arbeitnehmerId));
-        AbteilungsId = abteilungsId;
-    }
+    public DateOnly Datum { get; } = datum;
 
-    public DateOnly Datum { get; }
+    public string ArbeitnehmerId { get; } = arbeitnehmerId ?? throw new ArgumentNullException(nameof(arbeitnehmerId));
+    public string AbteilungsId { get; } = abteilungsId;
 
-    public string ArbeitnehmerId { get; }
-    public int AbteilungsId { get; }
-
-    public QueryResult<Tagessicht> Result { get; set; } = null!;
+    public QueryResult<Tagessicht> Result { get; set; } = Results.Empty;
 }
 
 internal class LadeTagesdienstzeitenHandler : QueryHandler<LadeTagesdienstzeiten, Tagessicht>

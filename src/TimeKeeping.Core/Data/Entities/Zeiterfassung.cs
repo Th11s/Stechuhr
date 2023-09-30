@@ -9,14 +9,14 @@ namespace Th11s.TimeKeeping.Data.Entities
     [Index(nameof(Datum))]
     public class Zeiterfassung : IHasUuid
     {
-        public Zeiterfassung(string arbeitnehmerId, int abteilungsId)
+        public Zeiterfassung(string arbeitnehmerId, string abteilungsId)
         {
             ArbeitnehmerId = arbeitnehmerId ?? throw new ArgumentNullException(nameof(arbeitnehmerId));
             AbteilungsId = abteilungsId;
         }
 
         [SetsRequiredMembers]
-        public Zeiterfassung(string arbeitnehmerId, int abteilungsId, DateOnly datum, DateTimeOffset zeitstempel, Stempeltyp stechTyp) 
+        public Zeiterfassung(string arbeitnehmerId, string abteilungsId, DateOnly datum, DateTimeOffset zeitstempel, Stempeltyp stechTyp) 
             : this(arbeitnehmerId, abteilungsId)
         {
             Datum = datum;
@@ -35,7 +35,7 @@ namespace Th11s.TimeKeeping.Data.Entities
 
         [ForeignKey(nameof(AbteilungsId))]
         public Abteilung? Abteilung { get; set; }
-        public int AbteilungsId { get; set; }
+        public string AbteilungsId { get; set; }
 
 
         public required DateOnly Datum { get; set; }

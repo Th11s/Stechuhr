@@ -3,7 +3,6 @@ using JGUZDV.CQRS.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Security.Claims;
 using Th11s.TimeKeeping.Configuration;
@@ -14,7 +13,7 @@ namespace Th11s.TimeKeeping.Commands.Internal
 {
     public record BerechneTagesdienstzeit(
         string ArbeitnehmerId,
-        int AbteilungsId,
+        string AbteilungsId,
         DateOnly Datum
         ) : ICommand
     { }

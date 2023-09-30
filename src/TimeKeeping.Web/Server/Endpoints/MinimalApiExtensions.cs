@@ -4,10 +4,10 @@ namespace TimeKeeping.Web.Server.Endpoints
 {
     public static class MinimalApiExtensions
     {
-        public static void UseMinimalApi(this WebApplication app)
+        public static void MapMinimalApi(this WebApplication app)
         {
             var api = app.MapGroup("/api/v1");
-            api.MapGet("/{jahr}-{monat}-{tag}", Zeiterfassungsansichten.Tagesansicht)
+            api.MapGet("/{abteilung}/{jahr}-{monat}-{tag}", Zeiterfassung.Tagesansicht)
                 .Produces(200, typeof(Tagessicht))
                 .Produces(400);
         }
