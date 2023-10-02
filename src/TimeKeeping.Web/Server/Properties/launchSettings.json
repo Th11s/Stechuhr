@@ -19,6 +19,14 @@
         "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development"
         }
+      },
+      "SetDefaultPassword": {
+        "commandName": "Project",
+        "dotnetRunMessages": true,
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development"
+        },
+        "commandLineArgs": "--SetAdminPassword Password1234!"
       }
     }
   }

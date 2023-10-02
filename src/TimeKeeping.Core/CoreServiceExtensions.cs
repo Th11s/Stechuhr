@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Th11s.TimeKeeping.Data;
+using Th11s.TimeKeeping.Services;
 
 namespace Th11s.TimeKeeping
 {
@@ -35,6 +36,8 @@ namespace Th11s.TimeKeeping
 
             services.AddTransient(sp => TimeProvider.System);
             services.AddCQRSHandlers(typeof(CoreServiceExtensions));
+
+            services.AddScoped<IAdminBenutzerService, AdministratorBenutzerService>();
 
             return services;
         }
