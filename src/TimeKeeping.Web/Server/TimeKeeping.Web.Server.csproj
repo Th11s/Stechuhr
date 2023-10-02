@@ -7,6 +7,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Controllers\**" />
+	  <Content Remove="Controllers\**" />
+	  <EmbeddedResource Remove="Controllers\**" />
+	  <None Remove="Controllers\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="JGUZDV.CQRS.AspNetCore" Version="2.1.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0-rc.1.23421.29" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0-rc.1.23421.29" />
@@ -28,10 +35,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\TimeKeeping.Core\TimeKeeping.Core.csproj" />
 		<ProjectReference Include="..\Client\TimeKeeping.Web.Client.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Controllers\" />
 	</ItemGroup>
 
 
