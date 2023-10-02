@@ -7,11 +7,18 @@ using TimeKeeping.Web.Server.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddDefaultIdentity<User>(
+    options => {
+        options.SignIn.RequireConfirmedAccount = true;
+    })
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+
 builder.Services.AddCoreServices(builder.Configuration);
 
-//TODO: Identity benötigt mehr setup
-builder.Services.AddIdentity<User, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>(); ;
+//////TODO: Identity benï¿½tigt mehr setup
+//builder.Services.AddIdentity<User, IdentityRole>()
+//    .AddEntityFrameworkStores<ApplicationDbContext>(); ;
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
