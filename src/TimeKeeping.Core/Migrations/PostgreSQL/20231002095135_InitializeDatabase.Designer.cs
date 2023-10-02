@@ -13,7 +13,7 @@ using Th11s.TimeKeeping.Data.Entities;
 namespace Th11s.TimeKeeping.Migrations.PostgreSQL
 {
     [DbContext(typeof(NpgsqlDbContext))]
-    [Migration("20231002081214_InitializeDatabase")]
+    [Migration("20231002095135_InitializeDatabase")]
     partial class InitializeDatabase
     {
         /// <inheritdoc />
@@ -229,6 +229,7 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                         .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset>("LastModified")
+                        .IsConcurrencyToken()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<TimeSpan?>("Pausenzeit")
@@ -427,7 +428,7 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                         .IsRequired();
 
                     b.HasOne("Th11s.TimeKeeping.Data.Entities.User", "Arbeitnehmer")
-                        .WithMany()
+                        .WithMany("Arbeitsplatz")
                         .HasForeignKey("ArbeitnehmerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -462,6 +463,11 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
             modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Abteilung", b =>
                 {
                     b.Navigation("Arbeitsplaetze");
+                });
+
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.User", b =>
+                {
+                    b.Navigation("Arbeitsplatz");
                 });
 #pragma warning restore 612, 618
         }
