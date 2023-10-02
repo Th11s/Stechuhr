@@ -8,7 +8,7 @@ using Th11s.TimeKeeping.Data.Entities;
 namespace Th11s.TimeKeeping.Migrations.PostgreSQL
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitializeDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -26,6 +26,11 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Abteilung", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Abteilung_Abteilung_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "Abteilung",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -47,9 +52,6 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    Discriminator = table.Column<string>(type: "character varying(13)", maxLength: 13, nullable: false),
-                    Stundensaldo = table.Column<TimeSpan>(type: "interval", nullable: true),
-                    Standarddienstzeit = table.Column<TimeSpan>(type: "interval", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -71,28 +73,6 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tagesdienstzeiten",
-                columns: table => new
-                {
-                    ArbeitnehmerId = table.Column<string>(type: "text", nullable: false),
-                    AbteilungsId = table.Column<int>(type: "integer", nullable: false),
-                    Datum = table.Column<DateOnly>(type: "date", nullable: false),
-                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Arbeitszeit = table.Column<TimeSpan>(type: "interval", nullable: true),
-                    Pausenzeit = table.Column<TimeSpan>(type: "interval", nullable: true),
-                    HatPausezeitminimum = table.Column<bool>(type: "boolean", nullable: false),
-                    Sollarbeitszeit = table.Column<TimeSpan>(type: "interval", nullable: false),
-                    Arbeitszeitgutschrift = table.Column<TimeSpan>(type: "interval", nullable: true),
-                    Zeitsaldo = table.Column<TimeSpan>(type: "interval", nullable: false),
-                    Probleme = table.Column<string[]>(type: "text[]", nullable: false),
-                    HatProbleme = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tagesdienstzeiten", x => new { x.ArbeitnehmerId, x.AbteilungsId, x.Datum });
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -109,6 +89,32 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Arbeitsplaetze",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ArbeitnehmerId = table.Column<string>(type: "text", nullable: false),
+                    AbteilungsId = table.Column<int>(type: "integer", nullable: false),
+                    Standarddienstzeit = table.Column<TimeSpan>(type: "interval", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Arbeitsplaetze", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Arbeitsplaetze_Abteilung_AbteilungsId",
+                        column: x => x.AbteilungsId,
+                        principalTable: "Abteilung",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Arbeitsplaetze_AspNetUsers_ArbeitnehmerId",
+                        column: x => x.ArbeitnehmerId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -199,13 +205,39 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                 });
 
             migrationBuilder.CreateTable(
+                name: "Tagesdienstzeiten",
+                columns: table => new
+                {
+                    ArbeitsplatzId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Datum = table.Column<DateOnly>(type: "date", nullable: false),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Arbeitszeit = table.Column<TimeSpan>(type: "interval", nullable: true),
+                    Pausenzeit = table.Column<TimeSpan>(type: "interval", nullable: true),
+                    HatPausezeitminimum = table.Column<bool>(type: "boolean", nullable: false),
+                    Sollarbeitszeit = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    Arbeitszeitgutschrift = table.Column<TimeSpan>(type: "interval", nullable: true),
+                    Zeitsaldo = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    Probleme = table.Column<string[]>(type: "text[]", nullable: false),
+                    HatProbleme = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tagesdienstzeiten", x => new { x.ArbeitsplatzId, x.Datum });
+                    table.ForeignKey(
+                        name: "FK_Tagesdienstzeiten_Arbeitsplaetze_ArbeitsplatzId",
+                        column: x => x.ArbeitsplatzId,
+                        principalTable: "Arbeitsplaetze",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Zeiterfassung",
                 columns: table => new
                 {
-                    Uuid = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    ArbeitnehmerId = table.Column<string>(type: "text", nullable: false),
-                    AbteilungsId = table.Column<int>(type: "integer", nullable: false),
+                    ArbeitsplatzId = table.Column<Guid>(type: "uuid", nullable: false),
                     Datum = table.Column<DateOnly>(type: "date", nullable: false),
                     Zeitstempel = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Stempeltyp = table.Column<int>(type: "integer", nullable: false),
@@ -217,20 +249,29 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Zeiterfassung", x => x.Uuid);
+                    table.PrimaryKey("PK_Zeiterfassung", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Zeiterfassung_Abteilung_AbteilungsId",
-                        column: x => x.AbteilungsId,
-                        principalTable: "Abteilung",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Zeiterfassung_AspNetUsers_ArbeitnehmerId",
-                        column: x => x.ArbeitnehmerId,
-                        principalTable: "AspNetUsers",
+                        name: "FK_Zeiterfassung_Arbeitsplaetze_ArbeitsplatzId",
+                        column: x => x.ArbeitsplatzId,
+                        principalTable: "Arbeitsplaetze",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Abteilung_ParentId",
+                table: "Abteilung",
+                column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Arbeitsplaetze_AbteilungsId",
+                table: "Arbeitsplaetze",
+                column: "AbteilungsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Arbeitsplaetze_ArbeitnehmerId",
+                table: "Arbeitsplaetze",
+                column: "ArbeitnehmerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -270,14 +311,9 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Zeiterfassung_AbteilungsId",
+                name: "IX_Zeiterfassung_ArbeitsplatzId",
                 table: "Zeiterfassung",
-                column: "AbteilungsId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Zeiterfassung_ArbeitnehmerId",
-                table: "Zeiterfassung",
-                column: "ArbeitnehmerId");
+                column: "ArbeitsplatzId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Zeiterfassung_Datum",
@@ -311,6 +347,9 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Arbeitsplaetze");
 
             migrationBuilder.DropTable(
                 name: "Abteilung");

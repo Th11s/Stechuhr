@@ -3,7 +3,6 @@ using JGUZDV.CQRS.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Security.Claims;
 using Th11s.TimeKeeping.Configuration;
@@ -13,8 +12,7 @@ using Th11s.TimeKeeping.Data.Entities;
 namespace Th11s.TimeKeeping.Commands.Internal
 {
     public record BerechneTagesdienstzeit(
-        string ArbeitnehmerId,
-        int AbteilungsId,
+        Guid ArbeitsplatzId,
         DateOnly Datum
         ) : ICommand
     { }
@@ -50,11 +48,12 @@ namespace Th11s.TimeKeeping.Commands.Internal
             if (context.Tagesdienstzeit == null)
             {
                 tagesdienstzeit = new(
-                    command.ArbeitnehmerId,
-                    command.AbteilungsId,
-                    command.Datum,
-                    context.Arbeitnehmer.Standarddienstzeit
-                );
+                    command.ArbeitsplatzId,
+                    command.Datum
+                )
+                {
+                    Sollarbeitszeit = context.Arbeitsplatz.Standarddienstzeit
+                };
 
                 _dbContext.Tagesdienstzeiten.Add(tagesdienstzeit);
                 await _dbContext.SaveChangesAsync(ct);
@@ -192,44 +191,35 @@ namespace Th11s.TimeKeeping.Commands.Internal
         {
             var timestamp = _timeProvider.GetUtcNow();
 
-            var arbeitnehmer = await _dbContext.Arbeitnehmer
-                .Where(x => x.Id == command.ArbeitnehmerId)
+            var arbeitsplatz = await _dbContext.Arbeitsplaetze
+                .Include(x => x.Abteilung)
+                .Where(x => x.Id == command.ArbeitsplatzId)
                 .FirstOrDefaultAsync(ct);
 
-            if (arbeitnehmer == null)
-                throw new CommandException(HandlerResult.NotValid("Validation:Arbeitnehmer:NotFound"));
-
-            var abteilung = await _dbContext.Abteilung
-                .Where(x => x.Id == command.AbteilungsId)
-                .FirstOrDefaultAsync(ct);
-
-            if (abteilung == null)
-                throw new CommandException(HandlerResult.NotValid("Validation:Abteilung:NotFound"));
+            if (arbeitsplatz == null)
+                throw new CommandException(HandlerResult.NotValid("Validation:Arbeitsplatz:NotFound"));
 
             var tagesdienstzeit = await _dbContext.Tagesdienstzeiten
                 .Where(x =>
-                    x.ArbeitnehmerId == command.ArbeitnehmerId &&
-                    x.AbteilungsId == command.AbteilungsId &&
+                    x.ArbeitsplatzId == command.ArbeitsplatzId &&
                     x.Datum == command.Datum)
                 .FirstOrDefaultAsync(ct);
 
             var stechzeiten = await _dbContext.Zeiterfassung
                 .Where(x =>
-                    x.ArbeitnehmerId == command.ArbeitnehmerId &&
-                    x.AbteilungsId == command.AbteilungsId &&
+                    x.ArbeitsplatzId == command.ArbeitsplatzId &&
                     x.Datum == command.Datum &&
                     !x.IstEntfernt)
                 .OrderBy(x => x.Zeitstempel)
                 .ToListAsync(ct);
 
-            return new(timestamp, arbeitnehmer, abteilung, tagesdienstzeit, stechzeiten);
+            return new(timestamp, arbeitsplatz, tagesdienstzeit, stechzeiten);
         }
 
 
         internal record CommandContext(
             DateTimeOffset Timestamp,
-            Arbeitnehmer Arbeitnehmer,
-            Abteilung Abteilung,
+            Arbeitsplatz Arbeitsplatz,
             Tagesdienstzeit? Tagesdienstzeit,
             List<Zeiterfassung> Stechzeiten);
     }

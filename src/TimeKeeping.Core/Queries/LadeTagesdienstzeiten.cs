@@ -7,21 +7,12 @@ using Th11s.TimeKeeping.SharedModel.Web;
 
 namespace Th11s.TimeKeeping.Queries;
 
-public class LadeTagesdienstzeiten : IQuery<Tagessicht>
+public class LadeTagesdienstzeiten(Guid arbeitsplatzId, DateOnly datum) : IQuery<Tagessicht>
 {
-    public LadeTagesdienstzeiten(DateOnly datum, string arbeitnehmerId, int abteilungsId)
-    {
-        Datum = datum;
-        ArbeitnehmerId = arbeitnehmerId ?? throw new ArgumentNullException(nameof(arbeitnehmerId));
-        AbteilungsId = abteilungsId;
-    }
+    public Guid ArbeitsplatzId { get; set; } = arbeitsplatzId;
+    public DateOnly Datum { get; } = datum;
 
-    public DateOnly Datum { get; }
-
-    public string ArbeitnehmerId { get; }
-    public int AbteilungsId { get; }
-
-    public QueryResult<Tagessicht> Result { get; set; } = null!;
+    public QueryResult<Tagessicht> Result { get; set; } = Results.Empty;
 }
 
 internal class LadeTagesdienstzeitenHandler : QueryHandler<LadeTagesdienstzeiten, Tagessicht>
@@ -42,20 +33,18 @@ internal class LadeTagesdienstzeitenHandler : QueryHandler<LadeTagesdienstzeiten
     {
         var tagesdienszeiten = await _dbContext.Tagesdienstzeiten
             .Where(x =>
-                x.ArbeitnehmerId == query.ArbeitnehmerId &&
-                x.AbteilungsId == query.AbteilungsId &&
+                x.ArbeitsplatzId == query.ArbeitsplatzId &&
                 x.Datum == query.Datum
             )
             .FirstOrDefaultAsync(ct);
 
         var stechzeiten = await _dbContext.Zeiterfassung
-            .Where(x => 
-                x.ArbeitnehmerId == query.ArbeitnehmerId &&
-                x.AbteilungsId == query.AbteilungsId &&
+            .Where(x =>
+                x.ArbeitsplatzId == query.ArbeitsplatzId &&
                 x.Datum == query.Datum
             )
             .Select(x => new Stechzeit(
-                x.Uuid,
+                x.Id,
                 x.Zeitstempel,
                 x.Stempeltyp,
                 x.IstNachbuchung,

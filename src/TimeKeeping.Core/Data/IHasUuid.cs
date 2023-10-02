@@ -2,6 +2,6 @@
 {
     public interface IHasUuid
     {
-        Guid Uuid { get; set; }
+        Guid Id { get; set; }
     }
 }
