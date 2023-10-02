@@ -28,7 +28,7 @@ public abstract class ArbeitsplatzCommandHandler<TCommand, TContext> : CommandHa
     {
         var arbeitsplatz = await _dbContext.Arbeitsplaetze
             .Include(x => x.Abteilung)
-            .Where(x => x.Uuid == arbeitsplatzId)
+            .Where(x => x.Id == arbeitsplatzId)
             .FirstOrDefaultAsync(ct);
 
         if (arbeitsplatz == null)

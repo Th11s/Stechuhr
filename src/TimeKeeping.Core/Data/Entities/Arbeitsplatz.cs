@@ -14,7 +14,7 @@ namespace Th11s.TimeKeeping.Data.Entities
         }
 
         [Key]
-        public Guid Uuid { get; set; }
+        public Guid Id { get; set; }
 
 
         [ForeignKey(nameof(ArbeitnehmerId))]
