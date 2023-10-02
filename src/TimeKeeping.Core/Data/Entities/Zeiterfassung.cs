@@ -9,15 +9,14 @@ namespace Th11s.TimeKeeping.Data.Entities
     [Index(nameof(Datum))]
     public class Zeiterfassung : IHasUuid
     {
-        public Zeiterfassung(string arbeitnehmerId, string abteilungsId)
+        public Zeiterfassung(Guid arbeitsplatzId)
         {
-            ArbeitnehmerId = arbeitnehmerId ?? throw new ArgumentNullException(nameof(arbeitnehmerId));
-            AbteilungsId = abteilungsId;
+            ArbeitsplatzId = arbeitsplatzId;
         }
 
         [SetsRequiredMembers]
-        public Zeiterfassung(string arbeitnehmerId, string abteilungsId, DateOnly datum, DateTimeOffset zeitstempel, Stempeltyp stechTyp) 
-            : this(arbeitnehmerId, abteilungsId)
+        public Zeiterfassung(Guid arbeitsplatzId, DateOnly datum, DateTimeOffset zeitstempel, Stempeltyp stechTyp) 
+            : this(arbeitsplatzId)
         {
             Datum = datum;
             Zeitstempel = zeitstempel;
@@ -25,17 +24,14 @@ namespace Th11s.TimeKeeping.Data.Entities
         }
 
         [Key]
-        public Guid Uuid { get; set; }
+        public Guid Id { get; set; }
         public DateTimeOffset LastModified { get; set; }
 
 
-        [ForeignKey(nameof(ArbeitnehmerId))]
-        public Arbeitnehmer? Arbeitnehmer { get; set; }
-        public string ArbeitnehmerId { get; set; }
+        [ForeignKey(nameof(ArbeitsplatzId))]
+        public Arbeitsplatz? Arbeitsplatz { get; set; }
+        public Guid ArbeitsplatzId { get; set; }
 
-        [ForeignKey(nameof(AbteilungsId))]
-        public Abteilung? Abteilung { get; set; }
-        public string AbteilungsId { get; set; }
 
 
         public required DateOnly Datum { get; set; }

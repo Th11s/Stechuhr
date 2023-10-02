@@ -7,7 +7,7 @@ namespace Th11s.TimeKeeping.Data
 {
     public class ApplicationDbContext : IdentityDbContext<User>
     {
-        public DbSet<Arbeitnehmer> Arbeitnehmer { get; set; }
+        public DbSet<Arbeitsplatz> Arbeitsplaetze { get; set; }
         public DbSet<Abteilung> Abteilung { get; set; }
 
 
@@ -42,10 +42,10 @@ namespace Th11s.TimeKeeping.Data
                .Where(x => EntityState.Added == x.State)
                .Select(x => x.Entity)
                .OfType<IHasUuid>()
-               .Where(x => x.Uuid == default);
+               .Where(x => x.Id == default);
 
             foreach (var e in entries)
-                e.Uuid = Guid.NewGuid();
+                e.Id = Guid.NewGuid();
         }
 
 

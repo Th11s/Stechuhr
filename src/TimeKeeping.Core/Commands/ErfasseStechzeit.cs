@@ -16,8 +16,7 @@ namespace Th11s.TimeKeeping.Commands
         DateTimeOffset Stechzeit,
         Stempeltyp Typ,
 
-        string ArbeitnehmerId,
-        string AbteilungsId
+        Guid ArbeitsplatzId
         ) : ICommand
     { }
 
@@ -65,8 +64,7 @@ namespace Th11s.TimeKeeping.Commands
             var istVorausgebucht = uhrabweichung < maxUhrabweichung;
 
             var entry = new Zeiterfassung(
-                command.ArbeitnehmerId, 
-                command.AbteilungsId,
+                command.ArbeitsplatzId,
                 command.Datum,
                 command.Stechzeit,
                 command.Typ)
@@ -83,7 +81,7 @@ namespace Th11s.TimeKeeping.Commands
 
             try
             {
-                await _tagesdienstzeitBerechnung.ExecuteAsync(new BerechneTagesdienstzeit(entry.ArbeitnehmerId, entry.AbteilungsId, entry.Datum), ct);
+                await _tagesdienstzeitBerechnung.ExecuteAsync(new BerechneTagesdienstzeit(entry.ArbeitsplatzId, entry.Datum), ct);
             }
             catch
             {

@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCoreServices(builder.Configuration);
 
-//TODO: Identity
+//TODO: Identity benötigt mehr setup
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>(); ;
 

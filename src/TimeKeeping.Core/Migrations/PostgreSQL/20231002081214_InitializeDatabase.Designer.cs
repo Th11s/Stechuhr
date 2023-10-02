@@ -2,18 +2,19 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Th11s.TimeKeeping.Data;
+using Th11s.TimeKeeping.Data.Entities;
 
 #nullable disable
 
-namespace Th11s.TimeKeeping.Migrations.SqlServer
+namespace Th11s.TimeKeeping.Migrations.PostgreSQL
 {
-    [DbContext(typeof(SqlServerDbContext))]
-    [Migration("20230929175548_InitialCreate")]
-    partial class InitialCreate
+    [DbContext(typeof(NpgsqlDbContext))]
+    [Migration("20231002081214_InitializeDatabase")]
+    partial class InitializeDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,33 +22,32 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.0-rc.1.23419.6")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                        .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
                 });
@@ -56,19 +56,19 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("RoleId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -81,19 +81,19 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -105,17 +105,17 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -127,10 +127,10 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -142,16 +142,16 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
@@ -162,65 +162,89 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ExternalId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int?>("ParentId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ParentId");
 
                     b.ToTable("Abteilung");
                 });
 
-            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Tagesdienstzeit", b =>
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Arbeitsplatz", b =>
                 {
-                    b.Property<string>("ArbeitnehmerId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
                     b.Property<int>("AbteilungsId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ArbeitnehmerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<TimeSpan>("Standarddienstzeit")
+                        .HasColumnType("interval");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AbteilungsId");
+
+                    b.HasIndex("ArbeitnehmerId");
+
+                    b.ToTable("Arbeitsplaetze");
+                });
+
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Tagesdienstzeit", b =>
+                {
+                    b.Property<Guid>("ArbeitsplatzId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateOnly>("Datum")
                         .HasColumnType("date");
 
                     b.Property<TimeSpan?>("Arbeitszeit")
-                        .HasColumnType("time");
+                        .HasColumnType("interval");
 
                     b.Property<TimeSpan?>("Arbeitszeitgutschrift")
-                        .HasColumnType("time");
+                        .HasColumnType("interval");
 
                     b.Property<bool>("HatPausezeitminimum")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("HatProbleme")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset>("LastModified")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<TimeSpan?>("Pausenzeit")
-                        .HasColumnType("time");
+                        .HasColumnType("interval");
 
-                    b.Property<string>("Probleme")
+                    b.Property<string[]>("Probleme")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text[]");
 
                     b.Property<TimeSpan>("Sollarbeitszeit")
-                        .HasColumnType("time");
+                        .HasColumnType("interval");
 
                     b.Property<TimeSpan>("Zeitsaldo")
-                        .HasColumnType("time");
+                        .HasColumnType("interval");
 
-                    b.HasKey("ArbeitnehmerId", "AbteilungsId", "Datum");
+                    b.HasKey("ArbeitsplatzId", "Datum");
 
                     b.ToTable("Tagesdienstzeiten");
                 });
@@ -228,59 +252,54 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
             modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.User", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("nvarchar(13)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -289,75 +308,54 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("User");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Zeiterfassung", b =>
                 {
-                    b.Property<Guid>("Uuid")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("AbteilungsId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ArbeitnehmerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("ArbeitsplatzId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateOnly>("Datum")
                         .HasColumnType("date");
 
                     b.Property<bool>("HatAnpassungen")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IstEntfernt")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IstNachbuchung")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IstVorausbuchung")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset>("LastModified")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Nachverfolgungseintrag[]>("Nachverfolgung")
+                        .HasColumnType("jsonb");
 
                     b.Property<int>("Stempeltyp")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("Zeitstempel")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Uuid");
+                    b.HasKey("Id");
 
-                    b.HasIndex("AbteilungsId");
-
-                    b.HasIndex("ArbeitnehmerId");
+                    b.HasIndex("ArbeitsplatzId");
 
                     b.HasIndex("Datum");
 
                     b.ToTable("Zeiterfassung");
-                });
-
-            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Arbeitnehmer", b =>
-                {
-                    b.HasBaseType("Th11s.TimeKeeping.Data.Entities.User");
-
-                    b.Property<TimeSpan>("Standarddienstzeit")
-                        .HasColumnType("time");
-
-                    b.Property<TimeSpan>("Stundensaldo")
-                        .HasColumnType("time");
-
-                    b.HasDiscriminator().HasValue("Arbeitnehmer");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -411,62 +409,59 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Zeiterfassung", b =>
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Abteilung", b =>
+                {
+                    b.HasOne("Th11s.TimeKeeping.Data.Entities.Abteilung", "Parent")
+                        .WithMany()
+                        .HasForeignKey("ParentId");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Arbeitsplatz", b =>
                 {
                     b.HasOne("Th11s.TimeKeeping.Data.Entities.Abteilung", "Abteilung")
-                        .WithMany()
+                        .WithMany("Arbeitsplaetze")
                         .HasForeignKey("AbteilungsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Th11s.TimeKeeping.Data.Entities.Arbeitnehmer", "Arbeitnehmer")
+                    b.HasOne("Th11s.TimeKeeping.Data.Entities.User", "Arbeitnehmer")
                         .WithMany()
                         .HasForeignKey("ArbeitnehmerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("Th11s.TimeKeeping.Data.Entities.Nachverfolgungseintrag", "Nachverfolgung", b1 =>
-                        {
-                            b1.Property<Guid>("ZeiterfassungUuid")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            b1.Property<DateTimeOffset>("At")
-                                .HasColumnType("datetimeoffset");
-
-                            b1.Property<string>("Command")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("Data")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<int>("UserId")
-                                .HasColumnType("int");
-
-                            b1.Property<string>("UserName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("ZeiterfassungUuid", "Id");
-
-                            b1.ToTable("Zeiterfassung");
-
-                            b1.ToJson("Nachverfolgung");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ZeiterfassungUuid");
-                        });
-
                     b.Navigation("Abteilung");
 
                     b.Navigation("Arbeitnehmer");
+                });
 
-                    b.Navigation("Nachverfolgung");
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Tagesdienstzeit", b =>
+                {
+                    b.HasOne("Th11s.TimeKeeping.Data.Entities.Arbeitsplatz", "Arbeitsplatz")
+                        .WithMany()
+                        .HasForeignKey("ArbeitsplatzId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Arbeitsplatz");
+                });
+
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Zeiterfassung", b =>
+                {
+                    b.HasOne("Th11s.TimeKeeping.Data.Entities.Arbeitsplatz", "Arbeitsplatz")
+                        .WithMany()
+                        .HasForeignKey("ArbeitsplatzId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Arbeitsplatz");
+                });
+
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Abteilung", b =>
+                {
+                    b.Navigation("Arbeitsplaetze");
                 });
 #pragma warning restore 612, 618
         }

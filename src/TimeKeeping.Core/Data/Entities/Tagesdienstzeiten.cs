@@ -3,34 +3,24 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Th11s.TimeKeeping.Data.Entities
 {
-    [PrimaryKey(nameof(ArbeitnehmerId), nameof(AbteilungsId), nameof(Datum))]
+    [PrimaryKey(nameof(ArbeitsplatzId), nameof(Datum))]
     public class Tagesdienstzeit : IPersistCalculatedFields
     {
         public Tagesdienstzeit(
-            string arbeitnehmerId,
-            string abteilungsId,
-            DateOnly datum,
-            TimeSpan sollarbeitszeit)
+            Guid arbeitsplatzId,
+            DateOnly datum)
         {
-            ArbeitnehmerId = arbeitnehmerId;
-            AbteilungsId = abteilungsId;
+            ArbeitsplatzId = arbeitsplatzId;
             Datum = datum;
-            Sollarbeitszeit = sollarbeitszeit;
         }
 
 
-        [ForeignKey(nameof(ArbeitnehmerId))]
-        public Arbeitnehmer Arbeitnehmer { get; set; }
-        public string ArbeitnehmerId { get; set; }
-
-
-        [ForeignKey(nameof(AbteilungsId))]
-        public Abteilung Abteilung { get; set; }
-        public string AbteilungsId { get; set; }
+        [ForeignKey(nameof(ArbeitsplatzId))]
+        public Arbeitsplatz? Arbeitsplatz { get; set; }
+        public Guid ArbeitsplatzId { get; set; }
 
 
         public DateOnly Datum { get; set; }
-
 
         public DateTimeOffset LastModified { get; set; }
 
@@ -46,7 +36,7 @@ namespace Th11s.TimeKeeping.Data.Entities
         public TimeSpan? Pausenzeit { get; set; }
         public bool HatPausezeitminimum { get; set; }
 
-        public TimeSpan Sollarbeitszeit { get; set; }
+        public required TimeSpan Sollarbeitszeit { get; set; }
         public TimeSpan? Arbeitszeitgutschrift { get; set; }
 
         public TimeSpan Zeitsaldo { get; private set; } = TimeSpan.Zero;

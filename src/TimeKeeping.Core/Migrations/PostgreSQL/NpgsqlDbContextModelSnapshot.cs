@@ -175,16 +175,40 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ParentId");
+
                     b.ToTable("Abteilung");
+                });
+
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Arbeitsplatz", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AbteilungsId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ArbeitnehmerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<TimeSpan>("Standarddienstzeit")
+                        .HasColumnType("interval");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AbteilungsId");
+
+                    b.HasIndex("ArbeitnehmerId");
+
+                    b.ToTable("Arbeitsplaetze");
                 });
 
             modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Tagesdienstzeit", b =>
                 {
-                    b.Property<string>("ArbeitnehmerId")
-                        .HasColumnType("text");
-
-                    b.Property<int>("AbteilungsId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ArbeitsplatzId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateOnly>("Datum")
                         .HasColumnType("date");
@@ -217,7 +241,7 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                     b.Property<TimeSpan>("Zeitsaldo")
                         .HasColumnType("interval");
 
-                    b.HasKey("ArbeitnehmerId", "AbteilungsId", "Datum");
+                    b.HasKey("ArbeitsplatzId", "Datum");
 
                     b.ToTable("Tagesdienstzeiten");
                 });
@@ -233,11 +257,6 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("character varying(13)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -289,24 +308,16 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("User");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Zeiterfassung", b =>
                 {
-                    b.Property<Guid>("Uuid")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("AbteilungsId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ArbeitnehmerId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("ArbeitsplatzId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateOnly>("Datum")
                         .HasColumnType("date");
@@ -335,28 +346,13 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                     b.Property<DateTimeOffset>("Zeitstempel")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Uuid");
+                    b.HasKey("Id");
 
-                    b.HasIndex("AbteilungsId");
-
-                    b.HasIndex("ArbeitnehmerId");
+                    b.HasIndex("ArbeitsplatzId");
 
                     b.HasIndex("Datum");
 
                     b.ToTable("Zeiterfassung");
-                });
-
-            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Arbeitnehmer", b =>
-                {
-                    b.HasBaseType("Th11s.TimeKeeping.Data.Entities.User");
-
-                    b.Property<TimeSpan>("Standarddienstzeit")
-                        .HasColumnType("interval");
-
-                    b.Property<TimeSpan>("Stundensaldo")
-                        .HasColumnType("interval");
-
-                    b.HasDiscriminator().HasValue("Arbeitnehmer");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -410,15 +406,24 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Zeiterfassung", b =>
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Abteilung", b =>
+                {
+                    b.HasOne("Th11s.TimeKeeping.Data.Entities.Abteilung", "Parent")
+                        .WithMany()
+                        .HasForeignKey("ParentId");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Arbeitsplatz", b =>
                 {
                     b.HasOne("Th11s.TimeKeeping.Data.Entities.Abteilung", "Abteilung")
-                        .WithMany()
+                        .WithMany("Arbeitsplaetze")
                         .HasForeignKey("AbteilungsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Th11s.TimeKeeping.Data.Entities.Arbeitnehmer", "Arbeitnehmer")
+                    b.HasOne("Th11s.TimeKeeping.Data.Entities.User", "Arbeitnehmer")
                         .WithMany()
                         .HasForeignKey("ArbeitnehmerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -427,6 +432,33 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                     b.Navigation("Abteilung");
 
                     b.Navigation("Arbeitnehmer");
+                });
+
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Tagesdienstzeit", b =>
+                {
+                    b.HasOne("Th11s.TimeKeeping.Data.Entities.Arbeitsplatz", "Arbeitsplatz")
+                        .WithMany()
+                        .HasForeignKey("ArbeitsplatzId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Arbeitsplatz");
+                });
+
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Zeiterfassung", b =>
+                {
+                    b.HasOne("Th11s.TimeKeeping.Data.Entities.Arbeitsplatz", "Arbeitsplatz")
+                        .WithMany()
+                        .HasForeignKey("ArbeitsplatzId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Arbeitsplatz");
+                });
+
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Abteilung", b =>
+                {
+                    b.Navigation("Arbeitsplaetze");
                 });
 #pragma warning restore 612, 618
         }
