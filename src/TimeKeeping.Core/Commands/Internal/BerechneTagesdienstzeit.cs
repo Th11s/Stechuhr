@@ -193,7 +193,7 @@ namespace Th11s.TimeKeeping.Commands.Internal
 
             var arbeitsplatz = await _dbContext.Arbeitsplaetze
                 .Include(x => x.Abteilung)
-                .Where(x => x.Id == command.ArbeitsplatzId)
+                .Where(x => x.Uuid == command.ArbeitsplatzId)
                 .FirstOrDefaultAsync(ct);
 
             if (arbeitsplatz == null)
