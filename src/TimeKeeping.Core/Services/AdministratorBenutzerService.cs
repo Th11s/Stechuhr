@@ -31,7 +31,9 @@ namespace Th11s.TimeKeeping.Services
             {
                 adminUser = new User
                 {
-                    UserName = "admin"
+                    UserName = "admin@localhost.tld",
+                    Email = "admin@localhost.tld",
+                    EmailConfirmed = true
                 };
 
                 var result = await _userManager.CreateAsync(adminUser, password);
