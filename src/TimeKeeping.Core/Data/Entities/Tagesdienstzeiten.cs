@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Th11s.TimeKeeping.Data.Entities
@@ -22,6 +23,7 @@ namespace Th11s.TimeKeeping.Data.Entities
 
         public DateOnly Datum { get; set; }
 
+        [ConcurrencyCheck]
         public DateTimeOffset LastModified { get; set; }
 
 

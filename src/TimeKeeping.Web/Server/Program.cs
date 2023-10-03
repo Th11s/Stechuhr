@@ -2,24 +2,27 @@ using Microsoft.AspNetCore.Identity;
 using Th11s.TimeKeeping;
 using Th11s.TimeKeeping.Data;
 using Th11s.TimeKeeping.Data.Entities;
+using Th11s.TimeKeeping.Services;
 using TimeKeeping.Web.Server.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCoreServices(builder.Configuration);
 
-//TODO: Identity benötigt mehr setup
+//TODO: Identity Setup weiter prÃ¼fen.
 builder.Services.AddIdentity<User, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>(); ;
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
+    options.SignIn.RequireConfirmedAccount = true;
+
     // Password settings.
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 14;
+    options.Password.RequiredLength = 12;
     options.Password.RequiredUniqueChars = 1;
 
     // Lockout settings.
@@ -49,7 +52,21 @@ builder.Services.AddRazorPages();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 var app = builder.Build();
+
+if (app.Configuration.GetValue<string?>("SetAdminPassword", null) is string password and not null)
+{
+    using(var scope = app.Services.CreateScope())
+    {
+        var eaas = scope.ServiceProvider.GetRequiredService<IAdminBenutzerService>();
+        await eaas.ExecuteAsync(password, default);
+
+        return;
+    }
+}
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

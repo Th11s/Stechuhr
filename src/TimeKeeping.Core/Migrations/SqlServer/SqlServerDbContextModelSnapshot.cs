@@ -226,6 +226,7 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset>("LastModified")
+                        .IsConcurrencyToken()
                         .HasColumnType("datetimeoffset");
 
                     b.Property<TimeSpan?>("Pausenzeit")
@@ -422,7 +423,7 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
                         .IsRequired();
 
                     b.HasOne("Th11s.TimeKeeping.Data.Entities.User", "Arbeitnehmer")
-                        .WithMany()
+                        .WithMany("Arbeitsplatz")
                         .HasForeignKey("ArbeitnehmerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -496,6 +497,11 @@ namespace Th11s.TimeKeeping.Migrations.SqlServer
             modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.Abteilung", b =>
                 {
                     b.Navigation("Arbeitsplaetze");
+                });
+
+            modelBuilder.Entity("Th11s.TimeKeeping.Data.Entities.User", b =>
+                {
+                    b.Navigation("Arbeitsplatz");
                 });
 #pragma warning restore 612, 618
         }

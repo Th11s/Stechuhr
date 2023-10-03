@@ -1,0 +1,27 @@
+﻿@page
+@{
+    Layout = "_LayoutBase";
+}
+
+@section Headers {
+    <link href="~/TimeKeeping.Web.Client.styles.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script defer src="~/_framework/blazor.webassembly.js"></script>
+    <script defer>navigator.serviceWorker.register('service-worker.js');</script>
+}
+
+<div id="app">
+    <svg class="loading-progress">
+        <circle r="40%" cx="50%" cy="50%" />
+        <circle r="40%" cx="50%" cy="50%" />
+    </svg> 
+    <div class="loading-progress-text"></div>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
