@@ -12,11 +12,11 @@ using Th11s.TimeKeeping.SharedModel.Primitives;
 namespace Th11s.TimeKeeping.Commands
 {
     public record ErfasseStechzeit(
+        Guid ArbeitsplatzId,
+
         DateOnly Datum,
         DateTimeOffset Stechzeit,
-        Stempeltyp Typ,
-
-        Guid ArbeitsplatzId
+        Stempeltyp Typ
         ) : ICommand
     { }
 
@@ -49,8 +49,6 @@ namespace Th11s.TimeKeeping.Commands
             Logger.LogError("AUTH NOT IMPLEMENTED!");
             return Task.FromResult(true);
 #endif
-
-            return base.AuthorizeAsync(command, principal, ct);
         }
 
         protected override async Task<HandlerResult> ExecuteInternalAsync(ErfasseStechzeit command, ClaimsPrincipal? principal, CancellationToken ct)
