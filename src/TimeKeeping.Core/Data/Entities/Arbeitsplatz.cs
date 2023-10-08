@@ -29,5 +29,7 @@ namespace Th11s.TimeKeeping.Data.Entities
 
 
         public TimeSpan Standarddienstzeit { get; set; }
+
+        public string? ExternalId { get; set; }
     }
 }
