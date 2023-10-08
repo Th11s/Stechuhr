@@ -8,17 +8,16 @@ using Th11s.TimeKeeping.SharedModel.Web;
 
 namespace Th11s.TimeKeeping.Queries
 {
-    public class LadeMonatsdienstzeit(Guid arbeitsplatzId, int jahr, int monat) : IQuery<Monatssicht>
+    public class LadeMonatsdienstzeit(Guid arbeitsplatzId, int jahr, int monat) 
+        : ArbeitsplatzQuery(arbeitsplatzId), IQuery<Monatssicht>
     {
-        public Guid ArbeitsplatzId { get; } = arbeitsplatzId;
-
         public int Jahr { get; } = jahr;
         public int Monat { get; } = monat;
 
         public QueryResult<Monatssicht> Result { get; set; } = Results.Empty;
     }
 
-    internal class LadeMonatsdienstzeitHandler : QueryHandler<LadeMonatsdienstzeit, Monatssicht>
+    internal class LadeMonatsdienstzeitHandler : ArbeitsplatzQueryHandler<LadeMonatsdienstzeit, Monatssicht>
     {
         private readonly ApplicationDbContext _dbContext;
 
@@ -30,14 +29,6 @@ namespace Th11s.TimeKeeping.Queries
         {
             _dbContext = dbContext;
             Logger = logger;
-        }
-
-        protected override Task<bool> AuthorizeExecuteAsync(LadeMonatsdienstzeit query, ClaimsPrincipal? principal, CancellationToken ct)
-        {
-#if DEBUG
-            Logger.LogError("AUTH NOT IMPLEMENTED!");
-            return Task.FromResult(true);
-#endif
         }
 
         protected override async Task<QueryResult<Monatssicht>> ExecuteInternalAsync(LadeMonatsdienstzeit query, ClaimsPrincipal? principal, CancellationToken ct)

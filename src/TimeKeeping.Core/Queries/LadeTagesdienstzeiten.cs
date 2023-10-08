@@ -7,15 +7,15 @@ using Th11s.TimeKeeping.SharedModel.Web;
 
 namespace Th11s.TimeKeeping.Queries;
 
-public class LadeTagesdienstzeiten(Guid arbeitsplatzId, DateOnly datum) : IQuery<Tagessicht>
+public class LadeTagesdienstzeiten(Guid arbeitsplatzId, DateOnly datum) 
+    : ArbeitsplatzQuery(arbeitsplatzId), IQuery<Tagessicht>
 {
-    public Guid ArbeitsplatzId { get; set; } = arbeitsplatzId;
     public DateOnly Datum { get; } = datum;
 
     public QueryResult<Tagessicht> Result { get; set; } = Results.Empty;
 }
 
-internal class LadeTagesdienstzeitenHandler : QueryHandler<LadeTagesdienstzeiten, Tagessicht>
+internal class LadeTagesdienstzeitenHandler : ArbeitsplatzQueryHandler<LadeTagesdienstzeiten, Tagessicht>
 {
     private readonly ApplicationDbContext _dbContext;
 
@@ -27,14 +27,6 @@ internal class LadeTagesdienstzeitenHandler : QueryHandler<LadeTagesdienstzeiten
     {
         _dbContext = dbContext;
         Logger = logger;
-    }
-
-    protected override Task<bool> AuthorizeExecuteAsync(LadeTagesdienstzeiten query, ClaimsPrincipal? principal, CancellationToken ct)
-    {
-#if DEBUG
-        Logger.LogError("AUTH NOT IMPLEMENTED!");
-        return Task.FromResult(true);
-#endif
     }
 
 
