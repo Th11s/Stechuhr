@@ -338,7 +338,7 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Nachverfolgungseintrag[]>("Nachverfolgung")
+                    b.Property<Zeiterfassungsaudit[]>("Nachverfolgung")
                         .HasColumnType("jsonb");
 
                     b.Property<int>("Stempeltyp")

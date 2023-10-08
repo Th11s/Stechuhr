@@ -241,7 +241,7 @@ namespace Th11s.TimeKeeping.Migrations.PostgreSQL
                     Datum = table.Column<DateOnly>(type: "date", nullable: false),
                     Zeitstempel = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Stempeltyp = table.Column<int>(type: "integer", nullable: false),
-                    Nachverfolgung = table.Column<Nachverfolgungseintrag[]>(type: "jsonb", nullable: true),
+                    Nachverfolgung = table.Column<Zeiterfassungsaudit[]>(type: "jsonb", nullable: true),
                     IstNachbuchung = table.Column<bool>(type: "boolean", nullable: false),
                     IstVorausbuchung = table.Column<bool>(type: "boolean", nullable: false),
                     HatAnpassungen = table.Column<bool>(type: "boolean", nullable: false),
