@@ -29,6 +29,15 @@ internal class LadeTagesdienstzeitenHandler : QueryHandler<LadeTagesdienstzeiten
         Logger = logger;
     }
 
+    protected override Task<bool> AuthorizeExecuteAsync(LadeTagesdienstzeiten query, ClaimsPrincipal? principal, CancellationToken ct)
+    {
+#if DEBUG
+        Logger.LogError("AUTH NOT IMPLEMENTED!");
+        return Task.FromResult(true);
+#endif
+    }
+
+
     protected override async Task<QueryResult<Tagessicht>> ExecuteInternalAsync(LadeTagesdienstzeiten query, ClaimsPrincipal? principal, CancellationToken ct)
     {
         var tagesdienszeiten = await _dbContext.Tagesdienstzeiten

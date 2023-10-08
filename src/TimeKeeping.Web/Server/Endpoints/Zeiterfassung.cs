@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Identity;
 using Th11s.TimeKeeping.Queries;
 using Th11s.TimeKeeping.SharedModel.Primitives;
 using Th11s.TimeKeeping.Data.Entities;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using JGUZDV.CQRS.Commands;
+using Th11s.TimeKeeping.Commands;
 
 namespace TimeKeeping.Web.Server.Endpoints
 {
@@ -13,8 +16,7 @@ namespace TimeKeeping.Web.Server.Endpoints
     {
         internal static async Task<IResult> Tagesansicht(
             Guid arbeitsplatzId,
-            int jahr, int monat, int tag, 
-            [FromServices] UserManager<User> userManager,
+            int jahr, int monat, int tag,
             [FromServices] IQueryHandler<LadeTagesdienstzeiten> queryHandler,
             HttpContext context, CancellationToken ct)
         {
@@ -28,17 +30,24 @@ namespace TimeKeeping.Web.Server.Endpoints
                 return Results.BadRequest();
             }
 
-            var result = await queryHandler.ExecuteQuery(new LadeTagesdienstzeiten(arbeitsplatzId, datum), context.User, ct);
+            var result = await queryHandler.ExecuteQuery(
+                new LadeTagesdienstzeiten(arbeitsplatzId, datum),
+                context.User, ct);
+
             return result.ToHttpResult();
         }
 
         internal static async Task<IResult> Monatsansicht(
             Guid arbeitsplatzId,
             int jahr, int monat,
-            [FromServices] UserManager<User> userManager,
+            [FromServices] IQueryHandler<LadeMonatsdienstzeit> queryHandler,
             HttpContext context, CancellationToken ct)
         {
-            return Results.BadRequest("TODO: Not Implemented");
+            var result = await queryHandler.ExecuteQuery(
+                new LadeMonatsdienstzeit(arbeitsplatzId, jahr, monat),
+                context.User, ct);
+
+            return result.ToHttpResult();
         }
 
         internal static async Task<IResult> Jahresansicht(
@@ -51,7 +60,6 @@ namespace TimeKeeping.Web.Server.Endpoints
 
         internal class ZeitstempelRequest
         {
-            public Guid ArbeitsplatzId { get; init; }
             public required DateOnly Datum { get; init; }
             public required Stempeltyp Stempeltyp { get; init; }
             
@@ -59,13 +67,17 @@ namespace TimeKeeping.Web.Server.Endpoints
         }
 
         internal static async Task<IResult> ErfasseZeitstempel(
+            Guid arbeitsplatzId,
             [FromBody] ZeitstempelRequest request,
-            [FromServices] UserManager<User> userManager,
+            [FromServices] TimeProvider timeProvider,
+            [FromServices] ICommandHandler<ErfasseStechzeit> commandHandler,
             HttpContext context, CancellationToken ct)
         {
-            var userId = userManager.GetUserId(context.User);
+            var result = await commandHandler.ExecuteAsync(
+                new ErfasseStechzeit(arbeitsplatzId, request.Datum, request.Zeitstempel ?? timeProvider.GetUtcNow(), request.Stempeltyp),
+                context.User, ct);
 
-            return Results.BadRequest("TODO: Not Implemented");
+            return result.ToHttpResult();
         }
     }
 }
