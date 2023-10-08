@@ -9,6 +9,7 @@ using Th11s.TimeKeeping.Configuration;
 using Th11s.TimeKeeping.Data;
 using Th11s.TimeKeeping.Data.Entities;
 using Th11s.TimeKeeping.SharedModel.Extensions;
+using Th11s.TimeKeeping.SharedModel.Primitives;
 
 namespace Th11s.TimeKeeping.Commands
 {
@@ -70,8 +71,14 @@ namespace Th11s.TimeKeeping.Commands
         protected override async Task<HandlerResult> ExecuteInternalAsync(EntferneStechzeit command, Zeiterfassung context, ClaimsPrincipal? principal, CancellationToken ct)
         {
             context.IstEntfernt = true;
-
-            //TODO: context.Nachverfolgung aktualisieren
+            context.Audit.Add(
+                new Zeiterfassungsaudit(
+                principal.GetUserId(),
+                principal.GetDisplayName(),
+                _timeProvider.GetUtcNow(),
+                context == null ? AuditOperation.Erstellt : AuditOperation.Editiert,
+                null
+                ));
 
             await _dbContext.SaveChangesAsync(ct);
             return HandlerResult.Success();

@@ -92,7 +92,14 @@ namespace Th11s.TimeKeeping.Commands
                 LastModified = _timeProvider.GetUtcNow()
             };
 
-            //TODO: Nachverfolgung aktualisieren
+            entry.Audit.Add(
+                new Zeiterfassungsaudit(
+                principal.GetUserId(),
+                principal.GetDisplayName(),
+                _timeProvider.GetUtcNow(),
+                context == null ? AuditOperation.Erstellt : AuditOperation.Editiert,
+                command.Stechzeit
+                ));
 
             _dbContext.Zeiterfassung.Add(entry);
             await _dbContext.SaveChangesAsync(ct);

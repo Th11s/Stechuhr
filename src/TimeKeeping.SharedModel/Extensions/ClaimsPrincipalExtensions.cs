@@ -5,6 +5,9 @@ namespace Th11s.TimeKeeping.SharedModel.Extensions
 {
     public static class ClaimsPrincipalExtensions
     {
+        public static string GetUserId(this ClaimsPrincipal p)
+            => p.FindFirst("sub")!.Value;
+
         public static string? GetDisplayName(this ClaimsPrincipal p) 
             => p.FindFirst("name")?.Value;
 

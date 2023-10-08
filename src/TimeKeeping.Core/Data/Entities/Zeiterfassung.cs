@@ -42,7 +42,7 @@ namespace Th11s.TimeKeeping.Data.Entities
         /// Enthält den gesamten Audit zum Eintrag.
         /// Die Audits werden per JSON gespeichert.
         /// </summary>
-        public Nachverfolgungseintrag[]? Nachverfolgung { get; set; }
+        public List<Zeiterfassungsaudit> Audit { get; set; } = new();
 
 
         public bool IstNachbuchung { get; set; }
