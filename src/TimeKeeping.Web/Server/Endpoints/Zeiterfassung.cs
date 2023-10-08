@@ -1,18 +1,15 @@
 ﻿
 using JGUZDV.CQRS.AspNetCore.Http;
+using JGUZDV.CQRS.Commands;
 using JGUZDV.CQRS.Queries;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
+using Th11s.TimeKeeping.Commands;
 using Th11s.TimeKeeping.Queries;
 using Th11s.TimeKeeping.SharedModel.Primitives;
-using Th11s.TimeKeeping.Data.Entities;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using JGUZDV.CQRS.Commands;
-using Th11s.TimeKeeping.Commands;
 
 namespace TimeKeeping.Web.Server.Endpoints
 {
-    public class Zeiterfassung
+    public static class Zeiterfassung
     {
         internal static async Task<IResult> Tagesansicht(
             Guid arbeitsplatzId,
