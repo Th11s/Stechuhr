@@ -8,6 +8,7 @@ using Th11s.TimeKeeping.Configuration;
 using Th11s.TimeKeeping.Data;
 using Th11s.TimeKeeping.Data.Entities;
 using Th11s.TimeKeeping.SharedModel.Primitives;
+using Th11s.TimeKeeping.SharedModel.Extensions;
 
 namespace Th11s.TimeKeeping.Commands
 {
@@ -45,10 +46,15 @@ namespace Th11s.TimeKeeping.Commands
 
         protected override Task<bool> AuthorizeAsync(ErfasseStechzeit command, ClaimsPrincipal? principal, CancellationToken ct)
         {
+            if (principal?.GetArbeitsplatzIds().Contains(command.ArbeitsplatzId.ToString()) == true)
+                return Task.FromResult(true);
+
 #if DEBUG
             Logger.LogError("AUTH NOT IMPLEMENTED!");
             return Task.FromResult(true);
 #endif
+
+            return Task.FromResult(false);
         }
 
         protected override async Task<HandlerResult> ExecuteInternalAsync(ErfasseStechzeit command, ClaimsPrincipal? principal, CancellationToken ct)
