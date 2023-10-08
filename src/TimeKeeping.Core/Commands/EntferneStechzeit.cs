@@ -76,11 +76,22 @@ namespace Th11s.TimeKeeping.Commands
                 principal.GetUserId(),
                 principal.GetDisplayName(),
                 _timeProvider.GetUtcNow(),
-                context == null ? AuditOperation.Erstellt : AuditOperation.Editiert,
+                AuditOperation.Entfernt,
                 null
                 ));
 
             await _dbContext.SaveChangesAsync(ct);
+
+            try
+            {
+                await _tagesdienstzeitBerechnung.ExecuteAsync(new BerechneTagesdienstzeit(context.ArbeitsplatzId, context.Datum), ct);
+            }
+            catch
+            {
+                //TODO: Tagesdienstzeit per "maintenance" erneut berechnen.
+                // Benutzer informieren, dass seine Dienstzeit evtl. unpräzise ist.
+            }
+
             return HandlerResult.Success();
         }
     }
