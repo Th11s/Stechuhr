@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Th11s.TimeKeeping;
+using Th11s.TimeKeeping.Auth;
 using Th11s.TimeKeeping.Data;
 using Th11s.TimeKeeping.Data.Entities;
 using Th11s.TimeKeeping.Services;
@@ -10,8 +12,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCoreServices(builder.Configuration);
 
 //TODO: Identity Setup weiter prüfen.
-builder.Services.AddIdentity<User, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddIdentity<User, IdentityRole>(opt =>
+    {
+        opt.ClaimsIdentity.UserIdClaimType = JwtRegisteredClaimNames.Sub;
+        opt.ClaimsIdentity.UserNameClaimType = JwtRegisteredClaimNames.Name;
+        opt.ClaimsIdentity.EmailClaimType = JwtRegisteredClaimNames.Email;
+        opt.ClaimsIdentity.RoleClaimType = "role";
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddClaimsPrincipalFactory<UserClaimsPrincipalFactory>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
