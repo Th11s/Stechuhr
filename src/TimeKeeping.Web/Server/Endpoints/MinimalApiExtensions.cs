@@ -29,7 +29,8 @@ namespace TimeKeeping.Web.Server.Endpoints
         {
             api.MapGet("/user", Introspection.User)
                 .Produces((int)HttpStatusCode.OK)
-                .Produces((int)HttpStatusCode.Unauthorized);
+                .Produces((int)HttpStatusCode.Unauthorized)
+                .WithName(nameof(Introspection.User));
         }
 
         private static void MapAdminApi(RouteGroupBuilder api)
