@@ -7,7 +7,7 @@ using Th11s.TimeKeeping.SharedModel.Primitives;
 namespace Th11s.TimeKeeping.Data.Entities
 {
     [Index(nameof(Datum))]
-    public class Zeiterfassung : IHasUuid
+    public class Zeiterfassung : IHasUuid, IZeitstempel
     {
         public Zeiterfassung(Guid arbeitsplatzId)
         {
@@ -61,18 +61,5 @@ namespace Th11s.TimeKeeping.Data.Entities
         /// Weitere Änderungen am Eintrag sind dadruch verhindert
         /// </summary>
         public bool IstEntfernt { get; set; }
-
-
-        [NotMapped]
-        public bool IstArbeitsbeginn => Stempeltyp == Stempeltyp.Arbeitsanfang;
-        
-        [NotMapped] 
-        public bool IstArbeitsende => Stempeltyp == Stempeltyp.Arbeitsende;
-        
-        [NotMapped] 
-        public bool IstPausenbeginn => Stempeltyp == Stempeltyp.Pausenanfang;
-        
-        [NotMapped] 
-        public bool IstPausenende => Stempeltyp == Stempeltyp.Pausenende;
     }
 }
