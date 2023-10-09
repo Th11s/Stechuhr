@@ -50,7 +50,20 @@ namespace TimeKeeping.Web.Client
         public async Task RemoveEntry(Entry entry)
         {
             await _initTask;
-            await Task.Delay(11);
+
+            _jobCts.Cancel();
+            await _jobTask;
+
+            _queue.Enqueue(new StechzeitCommand
+            {
+                ArbeitsplatzUuid = default,
+                Action = StechzeitAction.Delete,
+                Entry = entry
+            });
+            await _storage.SetItem(_storageKey, _queue);
+
+            _jobCts = new();
+            _jobTask = RunSync(_jobCts.Token);
         }
 
         private async Task InitializeAsync()
@@ -72,7 +85,7 @@ namespace TimeKeeping.Web.Client
                     {
                         if (ct.IsCancellationRequested)
                         {
-                            SyncCompleted?.Invoke(SyncResult.Cancelled); 
+                            SyncCompleted?.Invoke(SyncResult.Cancelled);
                             return;
                         }
 
@@ -89,7 +102,7 @@ namespace TimeKeeping.Web.Client
                         }
                         else if (command.Action == StechzeitAction.Delete)
                         {
-                            //TODO
+                            await _client.EntferneZeitstempelAsync(command.Entry.Uuid);
                         }
 
                         _queue.Dequeue();
