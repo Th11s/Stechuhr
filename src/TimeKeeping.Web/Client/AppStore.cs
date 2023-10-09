@@ -1,40 +1,81 @@
 ﻿using Th11s.TimeKeeping.SharedModel.Requests;
 using TimeKeeping.Web.Client.Clients;
+using TimeKeeping.Web.Client.Services;
 using TimeKeeping.Web.Shared.HttpModel;
 
 namespace TimeKeeping.Web.Client
 {
     public class AppStore
     {
+        public enum SyncResult
+        {
+            Error,
+            Success,
+            Cancelled
+        }
+
+        public event Action<SyncResult>? SyncCompleted;
+
         private Task _initTask;
         private Queue<StechzeitCommand> _queue = new();
         private readonly TimeKeepingClient _client;
+        private readonly IKeyValueStorage _storage;
 
-        public AppStore(TimeKeepingClient client)
+        private readonly string _storageKey = "appstore_queue";
+
+        private CancellationTokenSource _jobCts = new();
+        private Task _jobTask = Task.CompletedTask;
+
+        public AppStore(TimeKeepingClient client, IKeyValueStorage storage)
         {
             _client = client;
             _initTask = InitializeAsync();
+            _storage = storage;
         }
 
-        public Task InitializeAsync()
+        public async Task Upsert(Guid arbeitsplatzUuid, Entry entry)
+        {
+            await _initTask;
+
+            _jobCts.Cancel();
+            await _jobTask;
+
+            _queue.Enqueue(new StechzeitCommand { ArbeitsplatzUuid = arbeitsplatzUuid, Action = StechzeitAction.Upsert, Entry = entry });
+            await _storage.SetItem(_storageKey, _queue);
+
+            _jobCts = new();
+            _jobTask = RunSync(_jobCts.Token);
+        }
+
+        public async Task RemoveEntry(Entry entry)
+        {
+            await _initTask;
+            await Task.Delay(11);
+        }
+
+        private async Task InitializeAsync()
         {
             if (_initTask != null)
-                return _initTask;
+                await _initTask;
 
-            _queue = new();//TODO load from storage
-            _ = RunSync();
-
-            return Task.CompletedTask;
+            _queue = await _storage.GetItem<Queue<StechzeitCommand>>(_storageKey) ?? new();
+            _jobTask = RunSync(_jobCts.Token);
         }
 
-        private async Task RunSync()
+        private async Task RunSync(CancellationToken ct)
         {
             if (_queue.Any())
             {
                 try
                 {
-                    while (_queue.Any() )
+                    while (_queue.Any())
                     {
+                        if (ct.IsCancellationRequested)
+                        {
+                            SyncCompleted?.Invoke(SyncResult.Cancelled); 
+                            return;
+                        }
+
                         var command = _queue.Peek();
                         if (command.Action == StechzeitAction.Upsert)
                         {
@@ -51,52 +92,22 @@ namespace TimeKeeping.Web.Client
                             //TODO
                         }
 
-                        //TODO persist queue
                         _queue.Dequeue();
+                        await _storage.SetItem(_storageKey, _queue);
                     }
+
+                    SyncCompleted?.Invoke(SyncResult.Success);
                 }
                 catch
                 {
-
+                    SyncCompleted?.Invoke(SyncResult.Error);
                 }
             }
 
-            _ = Task.Delay(1000 * 60 * 15).ContinueWith(_ => RunSync());
-        }
-
-        public async Task Upsert(Guid arbeitsplatzUuid, Entry entry)
-        {
-            await _initTask;
-
-            if (_queue.Any())
-            {
-                _queue.Enqueue(new StechzeitCommand { ArbeitsplatzUuid = arbeitsplatzUuid, Action = StechzeitAction.Upsert, Entry = entry });
-                //TODO persist queue
-            }
-            else
-            {
-                try
-                {
-                    var zeitstempelRequest = new ZeitstempelRequest
-                    {
-                        Datum = DateOnly.FromDateTime(entry.At.ToLocalTime().Date),
-                        Stempeltyp = entry.Type,
-                        Zeitstempel = entry.At,
-                    };
-                    await _client.ErfasseZeitstempelAsync(arbeitsplatzUuid, zeitstempelRequest);
-                }
-                catch
-                {
-                    _queue.Enqueue(new StechzeitCommand { ArbeitsplatzUuid = arbeitsplatzUuid, Action = StechzeitAction.Upsert, Entry = entry });
-                    //TODO persist queue
-                }
-            }
-        }
-
-        public async Task RemoveEntry(Entry entry)
-        {
-            await _initTask;
-            await Task.Delay(11);
+            _jobCts.Cancel();
+            _jobCts = new();
+            _ = Task.Delay(1000 * 60 * 15, _jobCts.Token)
+                .ContinueWith(_ => _jobTask = RunSync(_jobCts.Token), TaskContinuationOptions.OnlyOnRanToCompletion);
         }
     }
 

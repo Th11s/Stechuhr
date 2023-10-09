@@ -69,5 +69,12 @@ namespace TimeKeeping.Web.Server.Endpoints
 
             return result.ToHttpResult();
         }
+
+        internal static async Task<IResult> EntferneZeitstempel(
+            Guid zeitstempelId,
+            HttpContext context, CancellationToken ct)
+        {
+            return Results.BadRequest("TODO: Not Implemented");
+        }
     }
 }

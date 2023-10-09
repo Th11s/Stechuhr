@@ -71,6 +71,9 @@
     [Inject]
     public AppStore AppStore { get; set; } = default!;
 
+    [Inject]
+    public AppState AppState { get; set; } = default!;
+
     private List<Entry> _entries = new();
 
     private Entry? _originalEntry;
@@ -80,7 +83,7 @@
     {
         var entry = new Entry(type, DateTimeOffset.Now);
 
-        await AppStore.Upsert(entry);
+        await AppStore.Upsert(AppState.ArbeitsplatzId, entry);
         _entries.Add(entry);
     }
 
@@ -111,7 +114,7 @@
     {
         if (_editEntry == null || _originalEntry == null) throw new InvalidOperationException($"{nameof(HandleSaveEntry)} called in invalid state");
 
-        await AppStore.Upsert(_editEntry);
+        await AppStore.Upsert(AppState.ArbeitsplatzId, _editEntry);
         _entries.Remove(_originalEntry);
         _entries.Add(_editEntry);
         _editEntry = null;
