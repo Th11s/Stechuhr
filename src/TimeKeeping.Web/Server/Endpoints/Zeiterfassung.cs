@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Th11s.TimeKeeping.Commands;
 using Th11s.TimeKeeping.Queries;
 using Th11s.TimeKeeping.SharedModel.Primitives;
+using Th11s.TimeKeeping.SharedModel.Requests;
 
 namespace TimeKeeping.Web.Server.Endpoints
 {
@@ -55,23 +56,16 @@ namespace TimeKeeping.Web.Server.Endpoints
             return Results.BadRequest("TODO: Not Implemented");
         }
 
-        internal class ZeitstempelRequest
-        {
-            public required DateOnly Datum { get; init; }
-            public required Stempeltyp Stempeltyp { get; init; }
-            
-            public DateTimeOffset? Zeitstempel { get; init; }
-        }
+
 
         internal static async Task<IResult> ErfasseZeitstempel(
             Guid arbeitsplatzId,
             [FromBody] ZeitstempelRequest request,
-            [FromServices] TimeProvider timeProvider,
             [FromServices] ICommandHandler<ErfasseStechzeit> commandHandler,
             HttpContext context, CancellationToken ct)
         {
             var result = await commandHandler.ExecuteAsync(
-                new ErfasseStechzeit(arbeitsplatzId, request.Datum, request.Zeitstempel ?? timeProvider.GetUtcNow(), request.Stempeltyp),
+                new ErfasseStechzeit(arbeitsplatzId, request.Datum, request.Zeitstempel, request.Stempeltyp),
                 context.User, ct);
 
             return result.ToHttpResult();
