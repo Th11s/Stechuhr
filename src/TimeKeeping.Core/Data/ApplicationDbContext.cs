@@ -75,7 +75,7 @@ namespace Th11s.TimeKeeping.Data
             builder.Entity<Zeiterfassung>(
                 e =>
                 {
-                    e.Property(p => p.Nachverfolgung)
+                    e.Property(p => p.Audit)
                         .HasColumnType("jsonb");
                 });
         }
@@ -94,7 +94,7 @@ namespace Th11s.TimeKeeping.Data
             builder.Entity<Zeiterfassung>(
                 e =>
                 {
-                    e.OwnsMany(p => p.Nachverfolgung)
+                    e.OwnsMany(p => p.Audit)
                         .ToJson();
                 });
         }

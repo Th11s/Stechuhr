@@ -8,10 +8,13 @@ using Th11s.TimeKeeping.Configuration;
 using Th11s.TimeKeeping.Data;
 using Th11s.TimeKeeping.Data.Entities;
 using Th11s.TimeKeeping.SharedModel.Primitives;
+using Th11s.TimeKeeping.SharedModel.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Th11s.TimeKeeping.Commands
 {
     public record ErfasseStechzeit(
+        Guid? Id,
         Guid ArbeitsplatzId,
 
         DateOnly Datum,
@@ -20,7 +23,7 @@ namespace Th11s.TimeKeeping.Commands
         ) : ICommand
     { }
 
-    internal class ErfasseStechzeitHandler : CommandHandler<ErfasseStechzeit>
+    internal class ErfasseStechzeitHandler : CommandHandler<ErfasseStechzeit, Zeiterfassung?>
     {
         private readonly TimeProvider _timeProvider;
         private readonly ApplicationDbContext _dbContext;
@@ -43,15 +46,31 @@ namespace Th11s.TimeKeeping.Commands
             _options = options;
         }
 
-        protected override Task<bool> AuthorizeAsync(ErfasseStechzeit command, ClaimsPrincipal? principal, CancellationToken ct)
+
+        protected override async Task<Zeiterfassung?> InitializeAsync(ErfasseStechzeit command, ClaimsPrincipal? principal, CancellationToken ct)
         {
+            var context = await _dbContext.Zeiterfassung
+                .Where(x => x.Id == command.Id && x.ArbeitsplatzId == command.ArbeitsplatzId)
+                .FirstOrDefaultAsync(ct);
+
+            return context;
+        }
+
+
+        protected override Task<bool> AuthorizeAsync(ErfasseStechzeit command, Zeiterfassung? context, ClaimsPrincipal? principal, CancellationToken ct)
+        {
+            if (principal?.GetArbeitsplatzIds().Contains(command.ArbeitsplatzId.ToString()) == true)
+                return Task.FromResult(true);
+
 #if DEBUG
             Logger.LogError("AUTH NOT IMPLEMENTED!");
             return Task.FromResult(true);
 #endif
+
+            return Task.FromResult(false);
         }
 
-        protected override async Task<HandlerResult> ExecuteInternalAsync(ErfasseStechzeit command, ClaimsPrincipal? principal, CancellationToken ct)
+        protected override async Task<HandlerResult> ExecuteInternalAsync(ErfasseStechzeit command, Zeiterfassung? context, ClaimsPrincipal? principal, CancellationToken ct)
         {
             // TODO: Mit Aaron besprechen, was gespeichert werden sollte. Vermutlich "lokales Datum" + DateTimeOffset als "echter" zeitstempel.
             var stechzeit = command.Stechzeit;
@@ -61,7 +80,7 @@ namespace Th11s.TimeKeeping.Commands
             var istNachgebucht = uhrabweichung > maxUhrabweichung;
             var istVorausgebucht = uhrabweichung < maxUhrabweichung;
 
-            var entry = new Zeiterfassung(
+            var entry = context ?? new Zeiterfassung(
                 command.ArbeitsplatzId,
                 command.Datum,
                 command.Stechzeit,
@@ -70,9 +89,17 @@ namespace Th11s.TimeKeeping.Commands
                 IstNachbuchung = istNachgebucht,
                 IstVorausbuchung = istVorausgebucht,
 
-                // TODO: Nachverfolgung = 
                 LastModified = _timeProvider.GetUtcNow()
             };
+
+            entry.Audit.Add(
+                new Zeiterfassungsaudit(
+                principal.GetUserId(),
+                principal.GetDisplayName(),
+                _timeProvider.GetUtcNow(),
+                context == null ? AuditOperation.Erstellt : AuditOperation.Editiert,
+                command.Stechzeit
+                ));
 
             _dbContext.Zeiterfassung.Add(entry);
             await _dbContext.SaveChangesAsync(ct);

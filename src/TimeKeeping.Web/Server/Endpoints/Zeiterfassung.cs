@@ -5,11 +5,12 @@ using JGUZDV.CQRS.Queries;
 using Microsoft.AspNetCore.Mvc;
 using Th11s.TimeKeeping.Commands;
 using Th11s.TimeKeeping.Queries;
+using Th11s.TimeKeeping.SharedModel.Primitives;
 using Th11s.TimeKeeping.SharedModel.Requests;
 
 namespace TimeKeeping.Web.Server.Endpoints
 {
-    public class Zeiterfassung
+    public static class Zeiterfassung
     {
         internal static async Task<IResult> Tagesansicht(
             Guid arbeitsplatzId,
