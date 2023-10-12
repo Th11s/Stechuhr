@@ -18,11 +18,16 @@ namespace TimeKeeping.Web.Server.Endpoints
                 .Produces((int)HttpStatusCode.BadRequest)
                 .WithName(nameof(Zeiterfassung.Monatsansicht));
 
-            api.MapPost("/{arbeitsplatzId:guid}/", Zeiterfassung.ErfasseZeitstempel)
+            api.MapPost("/{arbeitsplatzId:guid}", Zeiterfassung.ErfasseZeitstempel)
                 .Produces((int)HttpStatusCode.OK)
                 .Produces((int)HttpStatusCode.Created)
                 .Produces((int)HttpStatusCode.BadRequest)
                 .WithName(nameof(Zeiterfassung.ErfasseZeitstempel));
+
+            api.MapDelete("/{arbeitsplatzId:guid}", Zeiterfassung.EntferneZeitstempel)
+                .Produces((int)HttpStatusCode.OK)
+                .Produces((int)HttpStatusCode.BadRequest)
+                .WithName(nameof(Zeiterfassung.EntferneZeitstempel));
         }
     }
 }
